@@ -1,0 +1,94 @@
+name: CI
+
+# Called by deploy.yml, which owns the triggers. Keeping the triggers in
+# one place means the checks never run twice for the same commit.
+on:
+  workflow_call:
+
+jobs:
+  # Fast gate. House rules and the platform test suite need no browser, so
+  # a broken rule or a failing reconciliation test fails in under a minute.
+  checks:
+    name: rules and tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'      # 22.18+ strips TypeScript types unflagged; 24 is where it is stable
+          cache: npm
+      - run: npm ci
+      - name: House rules from CLAUDE.md
+        run: npm run rules
+      - name: Platform test suite
+        run: npm test
+
+  # Everything that needs a real browser, against a server that applies the
+  # same headers vercel.json will apply in production.
+  audit:
+    name: accessibility, focus and performance
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+
+      # Playwright advises against caching browser binaries: restoring the
+      # cache costs about what downloading them costs.
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Start the site
+        run: |
+          nohup node tools/dev-server.mjs 8123 > /tmp/dev-server.log 2>&1 &
+          echo $! > /tmp/dev-server.pid
+
+      - name: Wait for it
+        run: |
+          curl --fail --silent --show-error \
+               --retry 30 --retry-delay 1 --retry-connrefused \
+               http://127.0.0.1:8123/index.html > /dev/null
+
+      - name: axe-core, both pages, 1440 and 390
+        run: npm run axe
+
+      - name: Keyboard focus is visible on every control
+        run: npm run focus
+
+      - name: The hero input falls back rather than erroring
+        run: npm run intent
+
+      - name: Screenshots at 1440, 900 and 390
+        run: npm run shots
+
+      # Lighthouse holds accessibility, best practices and SEO at 100.
+      # Performance gets a floor, because a shared runner is a noisier
+      # machine than a laptop.
+      - name: Lighthouse, mobile
+        run: npm run lighthouse
+        env:
+          MIN_PERF: 75
+      - name: Lighthouse, desktop
+        run: npm run lighthouse -- desktop
+        env:
+          MIN_PERF: 85
+
+      - name: Keep the screenshots
+        uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: shots-${{ github.run_id }}
+          path: shots/
+          retention-days: 14
+
+      - name: Server log, if something failed
+        if: failure()
+        run: cat /tmp/dev-server.log
+      - name: Stop the site
+        if: always()
+        run: kill "$(cat /tmp/dev-server.pid)" || true

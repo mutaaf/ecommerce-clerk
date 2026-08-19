@@ -1,0 +1,1831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clerk — an AI salesperson for your ecommerce store</title>
+<meta name="description" content="Clerk puts an AI product expert on your ecommerce store, whatever it runs on. It understands your catalog, helps customers choose, builds the cart, and proves which orders it created. $0 setup, $0 monthly, 1% of attributed revenue.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TOKENS — light, airy, generous. Deep ink is reserved for type
+   and one anchor block, never for whole sections.
+   Rule held throughout: claims are set in the display grotesque,
+   anything the system can PROVE (ids, money, metrics) is mono.
+   ============================================================ */
+:root{
+  --paper:#FBFBFD;
+  --card:#FFFFFF;
+  --wash-1:#F4F2FE;        /* pale violet, the intent side */
+  --wash-2:#EEF8F4;        /* pale mint, the proof side    */
+  --ink:#14161F;
+  --ink-soft:#3A3F4E;
+  --muted:#6C7385;
+  --faint:#9BA2B4;
+  --intent:#6B4EFF;
+  --intent-soft:#EDE9FF;
+  --proof:#00A06B;
+  --proof-soft:#DCF5EA;
+  --flag:#F59331;
+  --flag-soft:#FFF0DE;
+  --line:rgba(20,22,31,.08);
+  --line-2:rgba(20,22,31,.14);
+  --sh-1:0 1px 2px rgba(20,22,31,.04);
+  --sh-2:0 2px 4px rgba(20,22,31,.03), 0 12px 28px -14px rgba(20,22,31,.16);
+  --sh-3:0 4px 8px rgba(20,22,31,.03), 0 24px 60px -22px rgba(20,22,31,.24);
+  --display:'Bricolage Grotesque','Helvetica Neue',Arial,sans-serif;
+  --body:'Instrument Sans','Helvetica Neue',Arial,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --pad:clamp(20px,5vw,72px); --maxw:1220px; --r:20px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:2.5px solid var(--intent);outline-offset:3px;border-radius:6px}
+[hidden]{display:none!important}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-left:var(--pad);padding-right:var(--pad)}
+section{padding:clamp(76px,10vw,152px) 0;position:relative}
+.tight{padding-top:0}
+.wash{background:linear-gradient(180deg,var(--wash-1) 0%,#FAF9FF 100%)}
+.wash + .wash{background:linear-gradient(180deg,#FAF9FF 0%,var(--wash-2) 100%)}
+
+h1,h2,h3{font-family:var(--display);font-weight:500;letter-spacing:-.03em;margin:0;line-height:1.08}
+h2{font-size:clamp(31px,4.6vw,58px)}
+h3{font-size:20px;letter-spacing:-.02em;line-height:1.25;font-weight:600}
+p{margin:0 0 1em}
+.lede{font-size:clamp(17.5px,1.55vw,21px);color:var(--muted);max-width:60ch;line-height:1.55}
+.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.17em;text-transform:uppercase;color:var(--intent);display:flex;align-items:center;gap:10px;margin-bottom:24px}
+.eyebrow::before{content:"";width:22px;height:1.5px;background:currentColor;border-radius:2px}
+.mono{font-family:var(--mono);font-variant-ligatures:none}
+.shead{max-width:64ch;margin-bottom:clamp(40px,5vw,68px)}
+.shead h2{margin-bottom:18px}
+
+.btn{display:inline-flex;align-items:center;gap:9px;border:0;border-radius:999px;padding:14px 26px;font-weight:600;font-size:15.5px;text-decoration:none;background:var(--ink);color:#fff;box-shadow:var(--sh-2);transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .18s}
+.btn:hover{transform:translateY(-2px);box-shadow:var(--sh-3)}
+.btn--lit{background:var(--intent);color:#fff}
+.btn--proof{background:var(--proof);color:#fff}
+.btn--ghost{background:rgba(255,255,255,.7);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line-2);backdrop-filter:blur(8px)}
+.btn--ghost:hover{box-shadow:inset 0 0 0 1.5px var(--ink),var(--sh-2)}
+.btn--sm{padding:10px 19px;font-size:14px}
+.btn--lg{padding:17px 32px;font-size:17px}
+
+/* ---------- nav ---------- */
+.nav{position:sticky;top:0;z-index:60;background:rgba(251,251,253,.72);backdrop-filter:saturate(180%) blur(18px);border-bottom:1px solid var(--line)}
+.nav__in{display:flex;align-items:center;gap:26px;height:68px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:19px;letter-spacing:-.035em;color:var(--ink);text-decoration:none}
+.brand__mark{width:22px;height:22px;border-radius:7px;background:linear-gradient(140deg,var(--intent),#4ED6A8);flex:none;box-shadow:0 3px 10px -2px rgba(107,78,255,.5)}
+.nav__links{display:flex;gap:24px;margin-left:auto;font-size:14.5px;color:var(--muted)}
+.nav__links a{text-decoration:none;padding:5px 0;border-bottom:1.5px solid transparent}
+.nav__links a:hover{color:var(--ink)}
+.nav__links a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--intent)}
+@media(max-width:900px){.nav__links{display:none}}
+
+/* ============================================================
+   HERO — ambient wash, the headline is the customer's sentence,
+   and the visitor can write their own.
+   ============================================================ */
+.hero{padding:clamp(52px,7vw,96px) 0 clamp(64px,8vw,116px);position:relative;overflow:hidden}
+.hero::before,.hero::after{content:"";position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0}
+.hero::before{width:min(760px,92vw);height:520px;background:radial-gradient(circle,rgba(107,78,255,.20),transparent 68%);top:-190px;left:-140px;animation:drift 26s ease-in-out infinite alternate}
+.hero::after{width:min(700px,88vw);height:480px;background:radial-gradient(circle,rgba(0,200,140,.18),transparent 68%);top:120px;right:-190px;animation:drift 32s ease-in-out infinite alternate-reverse}
+@keyframes drift{to{transform:translate3d(46px,-38px,0) scale(1.09)}}
+/* thesis hero */
+.thesis{max-width:19ch;margin-bottom:clamp(38px,5vw,60px);position:relative;z-index:1}
+.hero h1{font-size:clamp(34px,5.4vw,72px);font-weight:500;letter-spacing:-.04em;line-height:1.03;margin:0 0 26px;min-height:0;max-width:none}
+.hero h1 .hl{background:linear-gradient(100deg,var(--intent),#12B387);-webkit-background-clip:text;background-clip:text;color:transparent}
+.thesis__sub{font-size:clamp(17.5px,1.6vw,21px);color:var(--muted);max-width:56ch;line-height:1.55;margin:0}
+.thesis{max-width:none}
+.thesis h1{max-width:17ch}
+.thesis__sub b{color:var(--ink);font-weight:600}
+
+/* before / after */
+.ba{display:grid;grid-template-columns:1fr 1.06fr;gap:clamp(16px,2.4vw,26px);align-items:start;position:relative;z-index:1;margin-bottom:clamp(30px,4vw,44px)}
+@media(max-width:1000px){.ba{grid-template-columns:1fr}}
+.ba__k{margin-bottom:11px}
+.ba__tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;padding:5px 11px;border-radius:7px}
+.ba__tag--bad{background:#FFE9E4;color:#C2410C}
+.ba__tag--good{background:var(--proof-soft);color:var(--proof)}
+
+/* product screenshot frame */
+.frame{border-radius:16px;overflow:hidden;background:#E8EAF0;border:1px solid var(--line);box-shadow:var(--sh-3)}
+.frame__bar{display:flex;align-items:center;gap:6px;padding:11px 14px;background:#E8EAF0}
+.frame__bar i{width:9px;height:9px;border-radius:50%;background:#C9CDD8;flex:none}
+.frame__url{margin-left:12px;flex:1;background:#fff;border-radius:7px;padding:5px 12px;font-family:var(--mono);font-size:11px;color:var(--faint);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.frame__body{background:#fff;padding:16px;min-height:404px;background-image:linear-gradient(#F4F5F8 1px,transparent 1px),linear-gradient(90deg,#F4F5F8 1px,transparent 1px);background-size:34px 34px}
+.widget{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh-3);overflow:hidden;max-width:400px;margin-left:auto}
+.widget__head{display:flex;align-items:center;gap:9px;padding:11px 13px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff,#FBFBFD)}
+.widget__t{font-size:13px;font-weight:600}
+.widget__x{margin-left:auto;color:var(--faint);font-size:15px;line-height:1}
+.widget__thread{padding:14px 13px;display:flex;flex-direction:column;gap:11px}
+.widget__thread .msg{animation:none;opacity:1;transform:none;max-width:100%}
+.widget__thread .msg--c{max-width:92%}
+.widget__thread .msg__b{font-size:13.4px;padding:10px 13px}
+.widget__thread .prod__n{font-size:12.8px}
+.widget__foot{border-top:1px solid var(--line);background:var(--proof-soft);padding:11px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;font-family:var(--mono);font-size:12px;color:var(--proof)}
+.widget__foot b{font-size:14px}
+
+/* the unanswered question */
+.void{position:relative;z-index:1;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:clamp(22px,2.6vw,30px);box-shadow:var(--sh-2);min-height:446px;display:flex;flex-direction:column}
+.void__head{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:18px}
+.void__dot{width:7px;height:7px;border-radius:50%;background:var(--intent);box-shadow:0 0 0 4px var(--intent-soft);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(107,78,255,.08)}}
+.void__q{font-family:var(--display);font-weight:400;font-size:clamp(19px,2.4vw,30px);letter-spacing:-.026em;line-height:1.32;color:var(--ink);margin:0 0 20px;transition:opacity .7s ease,filter .7s ease}
+.void.gone .void__q{opacity:.24;filter:blur(1.5px)}
+.void__a{min-height:38px;display:flex;align-items:center;gap:11px;font-size:15.5px;color:var(--faint)}
+.void__a .dots{padding:11px 14px}
+.void__a .verdict{display:flex;align-items:center;gap:10px;font-size:15.5px;color:var(--ink-soft);opacity:0;animation:rise .5s ease forwards}
+.void__a .verdict b{font-weight:600}
+.void__a .x{width:22px;height:22px;border-radius:7px;background:#FFE9E4;color:#C2410C;display:grid;place-items:center;font-size:13px;flex:none}
+.void__f{margin-top:auto;padding-top:20px;border-top:1px dashed var(--line-2);font-size:14.5px;color:var(--muted);opacity:0;transition:opacity .5s ease}
+.void.gone .void__f{opacity:1}
+.void__f b{color:var(--ink);font-weight:600}
+
+/* the fix */
+.clerkgrid{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(22px,3vw,40px);align-items:start}
+@media(max-width:1000px){.clerkgrid{grid-template-columns:1fr}}
+.pain,.saidbox{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px;margin-bottom:14px;box-shadow:var(--sh-1)}
+.pain{background:linear-gradient(150deg,#FFF4EC,#fff 70%);border-color:rgba(245,147,49,.26)}
+.pain__k{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:9px}
+.pain__v{font-family:var(--display);font-weight:500;font-size:19px;letter-spacing:-.022em;line-height:1.25;margin:0;color:#9A4E0B}
+.said{font-family:var(--display);font-weight:400;font-size:clamp(17px,1.7vw,21px);letter-spacing:-.022em;line-height:1.4;margin:0;color:var(--ink-soft);min-height:4.2em}
+.said .q{color:var(--faint)}
+.said .caret{display:inline-block;width:3px;height:.8em;background:var(--intent);vertical-align:-.05em;margin-left:3px;border-radius:2px;animation:blink 1.05s steps(1) infinite}
+.ask{margin-bottom:10px;max-width:none}
+
+.hero__grid{display:grid;grid-template-columns:1.02fr .98fr;gap:clamp(30px,4vw,64px);align-items:start;position:relative;z-index:1}
+@media(max-width:1000px){.hero__grid{grid-template-columns:1fr;gap:40px}}
+.hero h1{font-size:clamp(30px,4.05vw,50px);font-weight:500;letter-spacing:-.033em;line-height:1.12;margin:0 0 26px;min-height:3.3em;color:var(--ink)}
+.hero h1 .q{color:var(--faint)}
+.hero h1 .caret{display:inline-block;width:3px;height:.8em;background:var(--intent);vertical-align:-.05em;margin-left:3px;border-radius:2px;animation:blink 1.05s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.asklabel{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--faint);margin:0 0 11px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.chip{border:1px solid var(--line-2);background:rgba(255,255,255,.7);color:var(--ink-soft);border-radius:999px;padding:8px 16px;font-size:13.5px;transition:.16s;backdrop-filter:blur(6px)}
+.chip:hover{border-color:var(--intent);color:var(--intent);transform:translateY(-1px)}
+.chip[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:600}
+
+/* free text intent box */
+.ask{display:flex;gap:8px;margin-bottom:26px;max-width:520px}
+.ask input{flex:1;min-width:0;padding:13px 17px;border-radius:999px;border:1px solid var(--line-2);background:rgba(255,255,255,.85);font-family:var(--body);font-size:14.5px;color:var(--ink);backdrop-filter:blur(6px);transition:.16s}
+.ask input:focus{border-color:var(--intent);background:#fff}
+.ask input::placeholder{color:var(--faint)}
+.ask button{border:0;border-radius:999px;padding:0 20px;background:var(--ink);color:#fff;font-size:14.5px;font-weight:600;box-shadow:var(--sh-2)}
+.ask button:hover{background:var(--intent)}
+.asknote{font-size:13px;color:var(--faint);margin:-16px 0 24px}
+
+.hero__sub{color:var(--muted);font-size:17px;max-width:52ch;margin-bottom:26px}
+.hero__sub b{color:var(--ink);font-weight:600}
+.hero__cta{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.hero__note{font-family:var(--mono);font-size:12px;color:var(--faint);margin-top:22px}
+
+/* ---------- demo panel ---------- */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);display:grid;grid-template-columns:1fr 224px;min-height:520px;overflow:hidden;box-shadow:var(--sh-3)}
+@media(max-width:640px){.panel{grid-template-columns:1fr;min-height:0}}
+.panel__head{grid-column:1/-1;display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);background:rgba(251,251,253,.6)}
+.panel__store{font-size:13.5px;font-weight:600}
+.panel__plat{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--proof)}
+.panel__tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);border:1px solid var(--line-2);border-radius:6px;padding:3px 8px;margin-left:auto}
+.replay{background:none;border:0;color:var(--faint);font-size:12.5px;padding:4px 6px;border-radius:6px}
+.replay:hover{color:var(--intent)}
+.thread{padding:20px 18px 24px;display:flex;flex-direction:column;gap:14px;min-height:400px}
+.msg{max-width:93%;opacity:0;transform:translateY(10px);animation:rise .45s cubic-bezier(.2,.8,.2,1) forwards}
+.msg--c{align-self:flex-end;max-width:86%}
+@keyframes rise{to{opacity:1;transform:none}}
+.msg__b{padding:12px 15px;border-radius:16px;font-size:14.6px;line-height:1.5}
+.msg--c .msg__b{background:var(--intent);color:#fff;border-bottom-right-radius:5px}
+.msg--a .msg__b{background:#F4F5F8;color:var(--ink-soft);border-bottom-left-radius:5px}
+.who{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+.msg--c .who{text-align:right}
+.dots{display:flex;gap:4px;padding:14px 16px;background:#F4F5F8;border-radius:16px;width:fit-content}
+.dots i{width:6px;height:6px;border-radius:50%;background:var(--faint);animation:bob .9s infinite}
+.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes bob{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+.parse{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.parse span{font-family:var(--mono);font-size:11px;padding:4px 9px;border-radius:7px;background:var(--intent-soft);color:var(--intent);animation:pop .3s cubic-bezier(.2,1.4,.4,1) backwards}
+@keyframes pop{from{opacity:0;transform:scale(.82)}}
+.prods{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.prod{display:flex;align-items:center;gap:12px;padding:11px 12px;border:1px solid var(--line);border-radius:13px;background:var(--card);transition:.18s}
+.prod:hover{transform:translateX(2px);box-shadow:var(--sh-2)}
+.prod--best{border-color:rgba(0,160,107,.4);background:linear-gradient(180deg,var(--proof-soft),#fff)}
+.prod__sw{width:36px;height:36px;border-radius:10px;flex:none;display:grid;place-items:center;font-family:var(--mono);font-size:11px;font-weight:600;color:#fff}
+.prod__n{font-size:13.6px;font-weight:600;line-height:1.25}
+.prod__m{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:2px}
+.prod__p{margin-left:auto;font-family:var(--mono);font-size:13.5px;font-weight:600}
+.best{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--proof)}
+.cart{margin-top:12px;border:1px solid rgba(0,160,107,.3);border-radius:14px;padding:13px 14px;background:var(--proof-soft)}
+.cart__r{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12.5px;color:var(--ink-soft);padding:2px 0}
+.cart__r--t{color:var(--proof);font-weight:600;font-size:14px;border-top:1px solid rgba(0,160,107,.24);margin-top:8px;padding-top:9px}
+.cart__cta{margin-top:12px;width:100%;justify-content:center;padding:11px}
+.ledger{border-left:1px solid var(--line);padding:20px 16px;background:linear-gradient(180deg,#FBFBFD,var(--wash-2))}
+@media(max-width:640px){.ledger{border-left:0;border-top:1px solid var(--line)}}
+.ledger__t{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--faint);margin-bottom:16px}
+.stamp{opacity:0;transform:translateX(8px);animation:rise .4s ease forwards;padding:9px 0;border-bottom:1px dashed var(--line-2)}
+.stamp__k{font-family:var(--mono);font-size:10.5px;color:var(--faint)}
+.stamp__v{font-family:var(--mono);font-size:12px;color:var(--ink);word-break:break-all;margin-top:3px}
+.stamp--win .stamp__v{color:var(--proof);font-weight:600;font-size:16px}
+
+/* ---------- founding seats ---------- */
+.seats{padding:0 0 clamp(52px,7vw,90px)}
+.seats__in{display:flex;flex-wrap:wrap;align-items:center;gap:clamp(16px,3vw,34px);background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:26px 30px;box-shadow:var(--sh-2)}
+.seats__n{font-family:var(--mono);font-size:clamp(32px,4vw,46px);font-weight:600;letter-spacing:-.03em;color:var(--proof);line-height:1}
+.seats__t{font-size:15px;color:var(--muted);max-width:44ch}
+.dotsrow{display:flex;gap:6px;margin-left:auto}
+@media(max-width:760px){.dotsrow{margin-left:0}}
+.dotsrow i{width:14px;height:14px;border-radius:5px;border:1.5px solid rgba(0,160,107,.4);background:var(--proof-soft)}
+.dotsrow i.taken{background:var(--proof);border-color:var(--proof)}
+
+/* ---------- loss ---------- */
+.loss{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:860px){.loss{grid-template-columns:1fr}}
+.lossbox{border:1px solid var(--line);border-radius:var(--r);padding:30px 28px;background:var(--card);box-shadow:var(--sh-2)}
+.lossbox--bad{background:rgba(255,255,255,.5);box-shadow:none;border-style:dashed}
+.lossbox__k{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:18px}
+.sent{font-family:var(--display);font-weight:400;font-size:clamp(19px,2.1vw,25px);letter-spacing:-.024em;line-height:1.34;margin-bottom:22px;color:var(--ink-soft)}
+.attrs{display:flex;flex-wrap:wrap;gap:7px}
+.attr{font-family:var(--mono);font-size:12px;padding:6px 11px;border-radius:8px;border:1px solid var(--line-2);background:#fff;transition:opacity .6s ease,transform .6s cubic-bezier(.4,0,.6,1),filter .6s ease}
+.lossbox--bad.fell .attr{opacity:.14;transform:translateY(15px) rotate(-2.5deg);filter:blur(1.5px)}
+.lossbox--bad .kw{margin-top:22px;font-family:var(--mono);font-size:15px;padding:12px 16px;border-radius:11px;background:var(--ink);color:#fff;display:inline-block;opacity:0;transform:scale(.95);transition:opacity .5s ease .35s,transform .5s cubic-bezier(.2,1.3,.4,1) .35s}
+.lossbox--bad.fell .kw{opacity:1;transform:none}
+.lossbox--good .attr{border-color:rgba(0,160,107,.3);background:var(--proof-soft);color:var(--proof)}
+.lossbox--good .kw{margin-top:22px;font-size:15px;color:var(--muted)}
+
+/* ---------- cards ---------- */
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:900px){.three{grid-template-columns:1fr}}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:820px){.two{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:30px 28px;box-shadow:var(--sh-2);transition:transform .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s}
+.card:hover{transform:translateY(-3px);box-shadow:var(--sh-3)}
+.card--locked{background:rgba(255,255,255,.45);box-shadow:none;border-style:dashed}
+.card--locked:hover{transform:none;box-shadow:none}
+.card__h{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.card__h h3{font-size:18.5px}
+.card p{font-size:15.3px;color:var(--muted);margin:0}
+.card__n{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:14px}
+.pill{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:4px 9px;border-radius:7px;white-space:nowrap}
+.pill--y{background:var(--proof-soft);color:var(--proof)}
+.pill--n{background:rgba(20,22,31,.05);color:var(--muted)}
+.pill--m{background:var(--flag-soft);color:#B3670F}
+.list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.list li{display:flex;gap:11px;align-items:flex-start;font-size:15.3px}
+.list li::before{content:"";width:16px;height:16px;border-radius:5px;flex:none;margin-top:4px;background:var(--proof-soft);box-shadow:inset 0 0 0 1px rgba(0,160,107,.3)}
+.card--locked li::before{background:rgba(20,22,31,.04);box-shadow:inset 0 0 0 1px var(--line-2)}
+.card--locked li{color:var(--muted)}
+
+/* ---------- platform selector ---------- */
+.plats{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:28px}
+.plat{border:1px solid var(--line-2);background:var(--card);color:var(--ink);border-radius:999px;padding:10px 19px;font-size:14.5px;font-weight:500;display:inline-flex;align-items:center;gap:9px;box-shadow:var(--sh-1);transition:.18s}
+.plat:hover{transform:translateY(-2px);box-shadow:var(--sh-2)}
+.plat .dot{width:7px;height:7px;border-radius:50%;background:var(--proof)}
+.plat[data-status="build"] .dot{background:var(--flag)}
+.plat[data-status="generic"] .dot{background:var(--faint)}
+.plat[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink);box-shadow:var(--sh-2)}
+.plat[aria-pressed="true"] .dot{background:#4ED6A8}
+.plat[aria-pressed="true"][data-status="build"] .dot{background:var(--flag)}
+.plat[aria-pressed="true"][data-status="generic"] .dot{background:#fff}
+.platbox{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh-2)}
+.platbox__h{padding:26px 28px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff,#FBFBFD)}
+.platbox__h .card__h{margin-bottom:0}
+.platbox__h p{font-size:15px;color:var(--muted);margin:10px 0 0;max-width:62ch}
+.contract{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+@media(max-width:820px){.contract{grid-template-columns:1fr}}
+.prow{display:grid;grid-template-columns:150px 1fr;gap:20px;padding:15px 28px;border-bottom:1px solid var(--line);font-size:15px}
+.prow:last-child{border-bottom:0}
+.prow b{font-family:var(--mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:500;padding-top:3px}
+@media(max-width:560px){.prow{grid-template-columns:1fr;gap:4px;padding:14px 20px}}
+
+/* ---------- attribution stepper ---------- */
+.chain{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:900px){.chain{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.chain{grid-template-columns:1fr}}
+.node{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:24px 22px;box-shadow:var(--sh-1);opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform .55s cubic-bezier(.2,.8,.2,1),box-shadow .25s,border-color .25s;text-align:left;width:100%;font:inherit;color:inherit;display:block}
+.node.in{opacity:1;transform:none}
+.node:hover{box-shadow:var(--sh-2)}
+.node[aria-current="step"]{border-color:var(--intent);box-shadow:0 0 0 3px rgba(107,78,255,.12),var(--sh-2)}
+.node__i{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.1em}
+.node h3{margin:11px 0 8px;font-size:19px}
+.node p{font-size:14.6px;color:var(--muted);margin:0 0 14px}
+.node code{display:block;font-family:var(--mono);font-size:11.5px;background:var(--wash-1);border-radius:9px;padding:10px 11px;word-break:break-all;color:var(--intent)}
+.node--end code{background:var(--proof-soft);color:var(--proof)}
+.node__bar{height:3px;border-radius:3px;background:var(--line);margin-top:16px;overflow:hidden}
+.node__bar i{display:block;height:100%;width:0;background:var(--intent);border-radius:3px}
+.node[aria-current="step"] .node__bar i{animation:fill 4s linear forwards}
+@keyframes fill{to{width:100%}}
+
+/* ---------- dashboard ---------- */
+.board{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:900px){.board{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:460px){.board{grid-template-columns:1fr}}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:26px 24px;box-shadow:var(--sh-1)}
+.tile__k{font-family:var(--mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:14px}
+.tile__v{font-family:var(--mono);font-size:clamp(25px,2.9vw,34px);font-weight:600;letter-spacing:-.025em;line-height:1}
+.tile--hero{grid-column:span 2;background:linear-gradient(150deg,var(--proof-soft),#fff 70%);border-color:rgba(0,160,107,.22)}
+@media(max-width:460px){.tile--hero{grid-column:span 1}}
+.tile--hero .tile__v{font-size:clamp(40px,6.4vw,74px);color:var(--proof)}
+.tile__d{font-size:13.5px;color:var(--muted);margin-top:10px}
+.bars{margin-top:20px;display:grid;gap:14px;max-width:780px}
+.bar{display:grid;grid-template-columns:minmax(0,1fr) 96px;align-items:center;gap:18px}
+.bar__l{font-size:15px}
+.bar__t{height:10px;border-radius:6px;background:rgba(20,22,31,.05);overflow:hidden;margin-top:8px}
+.bar__f{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--intent),#4ED6A8);width:0;transition:width 1.2s cubic-bezier(.2,.8,.2,1)}
+.bar__n{font-family:var(--mono);font-size:13px;color:var(--faint);text-align:right}
+.bar__n b{color:var(--proof);font-weight:600}
+
+/* ---------- funnel simulator ---------- */
+.sim{display:grid;grid-template-columns:340px 1fr;gap:clamp(24px,3.4vw,44px);background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:clamp(26px,3.4vw,44px);box-shadow:var(--sh-3)}
+@media(max-width:900px){.sim{grid-template-columns:1fr}}
+.knob{margin-bottom:26px}
+.knob__h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;gap:12px}
+.knob__l{font-size:14.5px;color:var(--muted)}
+.knob__v{font-family:var(--mono);font-size:16px;font-weight:600}
+input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:6px;border-radius:6px;background:linear-gradient(90deg,var(--intent),#4ED6A8);outline-offset:8px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:#fff;border:1.5px solid var(--line-2);box-shadow:var(--sh-2);cursor:grab}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:#fff;border:1.5px solid var(--line-2);box-shadow:var(--sh-2);cursor:grab}
+.funnel{display:grid;gap:9px;margin-bottom:26px}
+.step{position:relative;border-radius:12px;padding:13px 17px;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:14px;font-size:14.5px;transition:width .55s cubic-bezier(.2,.8,.2,1);min-width:190px;overflow:hidden}
+.step b{font-family:var(--mono);font-weight:600;white-space:nowrap}
+.step small{opacity:.72;font-size:12px;font-family:var(--mono)}
+.split{display:grid;gap:0;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+.split__r{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:17px 20px;background:#FBFBFD;border-bottom:1px solid var(--line)}
+.split__r:last-child{border-bottom:0}
+.split__r--keep{background:var(--proof-soft)}
+.split__k{font-size:14.5px;color:var(--muted)}
+.split__v{font-family:var(--mono);font-size:20px;font-weight:600;white-space:nowrap}
+.split__r--keep .split__v{color:var(--proof)}
+.terms{margin-top:16px}
+.terms .price{font-family:var(--mono);font-size:46px;font-weight:600;letter-spacing:-.035em;line-height:1;margin:14px 0 6px}
+.terms .price small{font-size:15px;color:var(--muted);letter-spacing:0}
+.terms ul{list-style:none;margin:22px 0 0;padding:0;display:grid;gap:11px;font-size:14.8px}
+.terms li{display:flex;gap:10px}
+.terms li b{font-family:var(--mono);color:var(--proof);font-weight:600;flex:none}
+
+/* ---------- weeks ---------- */
+.weeks{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:900px){.weeks{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.weeks{grid-template-columns:1fr}}
+.week{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:28px 24px;box-shadow:var(--sh-1);transition:transform .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s}
+.week:hover{transform:translateY(-3px);box-shadow:var(--sh-2)}
+.week__n{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--intent);margin-bottom:16px}
+.week h3{margin-bottom:14px;font-size:19px}
+.week ul{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:7px;font-size:13.6px;color:var(--muted);font-family:var(--mono)}
+.week__g{font-size:14.3px;border-top:1px solid var(--line);padding-top:15px;color:var(--ink-soft)}
+.week__g em{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-style:normal;margin-bottom:6px}
+
+/* ---------- faq ---------- */
+.faq{max-width:920px}
+.q{border-bottom:1px solid var(--line)}
+.q:first-child{border-top:1px solid var(--line)}
+.q__b{width:100%;text-align:left;padding:26px 44px 26px 0;display:block;position:relative;cursor:pointer;list-style:none;font-family:var(--display);font-size:clamp(18px,2vw,24px);font-weight:500;letter-spacing:-.022em}
+.q__b::-webkit-details-marker{display:none}
+.q__b::marker{content:""}
+.q__b::after{content:"";position:absolute;right:8px;top:50%;width:11px;height:11px;border-right:1.8px solid var(--faint);border-bottom:1.8px solid var(--faint);transform:translateY(-70%) rotate(45deg);transition:transform .25s}
+.q[open] .q__b::after{transform:translateY(-30%) rotate(-135deg);border-color:var(--intent)}
+.q__a{padding:0 0 28px;max-width:72ch;color:var(--muted);font-size:16.3px}
+.q__a p:last-child{margin-bottom:0}
+
+/* ---------- cta ---------- */
+.cta{background:linear-gradient(145deg,#1A1633 0%,#1E2B3F 55%,#123A32 100%);color:#fff;border-radius:calc(var(--r) + 6px);padding:clamp(32px,5vw,70px);display:grid;grid-template-columns:1.15fr 1fr;gap:clamp(28px,4vw,56px);align-items:center;box-shadow:var(--sh-3);position:relative;overflow:hidden}
+.cta::before{content:"";position:absolute;width:520px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(107,78,255,.42),transparent 68%);top:-160px;right:-110px;filter:blur(60px);pointer-events:none}
+@media(max-width:860px){.cta{grid-template-columns:1fr}}
+.cta > *{position:relative;z-index:1}
+.cta h2{color:#fff;margin-bottom:18px}
+.cta p{color:rgba(255,255,255,.66);max-width:48ch}
+.form{display:grid;gap:11px}
+.form input,.form select{width:100%;padding:15px 17px;border-radius:13px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);color:#fff;font-family:var(--body);font-size:15px}
+.form input::placeholder{color:rgba(255,255,255,.45)}
+.form input:focus,.form select:focus{background:rgba(255,255,255,.14)}
+.form select option{background:#1A1633;color:#fff}
+.form .btn{justify-content:center;margin-top:5px;background:#fff;color:var(--ink)}
+.form small{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.5);line-height:1.55}
+
+/* ---------- technical page pieces ---------- */
+.arch{display:grid;gap:11px;max-width:800px;margin:0 auto}
+.layer{border:1px solid var(--line);border-radius:15px;padding:18px 22px;background:var(--card);display:flex;align-items:center;gap:14px;flex-wrap:wrap;box-shadow:var(--sh-1);transition:.2s}
+.layer:hover{transform:translateX(3px);box-shadow:var(--sh-2)}
+.layer--ours{border-color:rgba(107,78,255,.28);background:linear-gradient(100deg,var(--wash-1),#fff 65%)}
+.layer--split{background:transparent;border:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:11px;box-shadow:none}
+.layer--split:hover{transform:none}
+@media(max-width:640px){.layer--split{grid-template-columns:1fr}}
+.layer__n{font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:-.02em}
+.layer__d{font-family:var(--mono);font-size:12px;color:var(--faint);margin-top:2px}
+.layer__tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--intent);background:var(--intent-soft);border-radius:6px;padding:3px 8px;margin-left:auto}
+.arrow{text-align:center;color:var(--line-2);font-family:var(--mono);font-size:15px;line-height:1}
+.tools{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:900px){.tools{grid-template-columns:1fr}}
+.tool__g{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.tool__g code{font-family:var(--mono);font-size:12px;padding:6px 10px;border-radius:8px;background:var(--wash-1);color:var(--intent)}
+.tool__g code.soon{background:rgba(20,22,31,.04);color:var(--faint)}
+.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:900px){.rules{grid-template-columns:1fr}}
+.rule__f{font-family:var(--mono);font-size:12.5px;color:var(--muted);display:grid;gap:6px;margin:16px 0 18px;padding-left:14px;border-left:2px solid var(--line-2)}
+.stackcols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:820px){.stackcols{grid-template-columns:1fr}}
+.stacklist{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px;font-family:var(--mono);font-size:13px;color:var(--muted)}
+.flyw{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-top:8px}
+.flyw span{font-family:var(--mono);font-size:12.5px;padding:8px 14px;background:var(--card);border:1px solid var(--line);border-radius:999px;color:var(--ink-soft);box-shadow:var(--sh-1)}
+.flyw i{color:var(--faint);font-style:normal}
+.crumb{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--muted);text-decoration:none;margin-bottom:22px}
+.crumb:hover{color:var(--intent)}
+.miles{display:flex;flex-wrap:wrap;gap:12px;margin-top:36px}
+.mile{border:1px solid var(--line);border-radius:15px;padding:16px 22px;background:var(--card);box-shadow:var(--sh-1)}
+.mile b{display:block;font-family:var(--mono);font-size:20px;letter-spacing:-.025em}
+.mile span{font-size:12.5px;color:var(--muted)}
+
+footer{border-top:1px solid var(--line);padding:36px 0;font-size:13.5px;color:var(--muted)}
+footer .in{display:flex;flex-wrap:wrap;gap:18px;align-items:center}
+footer a{text-decoration:none;border-bottom:1px solid var(--line-2)}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav"><div class="wrap nav__in">
+  <a class="brand" href="#/"><span class="brand__mark"></span><span data-bind="brand"></span></a>
+  <div class="nav__links">
+    <a href="#/" data-route="/">For merchants</a>
+    <a href="#/platform" data-route="/platform">Platform &amp; architecture</a>
+  </div>
+  <a class="btn btn--lit btn--sm" href="#start">See it on my store</a>
+</div></nav>
+
+<!-- ============================================================
+     VIEW: HOME  (short, CTA driven, no architecture)
+     ============================================================ -->
+<div data-view="/">
+
+<header class="hero" id="top"><div class="wrap">
+  <div class="thesis">
+    <div class="eyebrow" data-bind="heroEyebrow"></div>
+    <h1>Ecommerce has one problem.<br><span class="hl">There is nobody in the shop.</span></h1>
+    <p class="thesis__sub">Walk into a good store and somebody comes over, asks two questions and hands you the right thing. Your website gives that same customer a search box, four hundred results and no one to ask. <b>Clerk</b> puts the salesperson back, on your site, working from your real stock. Here is the same customer, both ways.</p>
+  </div>
+
+  <p class="asklabel">Pick your category and watch the difference</p>
+  <div class="chips" data-mount="chips" role="group" aria-label="Choose your store category"></div>
+
+  <div class="ba">
+    <div class="ba__col">
+      <div class="ba__k"><span class="ba__tag ba__tag--bad">Your store today</span></div>
+      <div class="void" aria-live="polite">
+        <div class="void__head"><span class="void__dot"></span><span>A customer, on a store like yours</span></div>
+        <p class="void__q" id="voidText"></p>
+        <div class="void__a" id="voidAns"></div>
+        <div class="void__f" id="voidFoot"></div>
+      </div>
+    </div>
+
+    <div class="ba__col">
+      <div class="ba__k"><span class="ba__tag ba__tag--good">The same customer, with Clerk</span></div>
+      <div class="frame">
+        <div class="frame__bar">
+          <i></i><i></i><i></i>
+          <span class="frame__url" id="frameUrl"></span>
+        </div>
+        <div class="frame__body">
+          <div class="widget">
+            <div class="widget__head">
+              <span class="brand__mark" style="width:15px;height:15px;border-radius:5px"></span>
+              <span class="widget__t">Ask our product expert</span>
+              <span class="widget__x">&times;</span>
+            </div>
+            <div class="widget__thread" id="afterThread"></div>
+            <div class="widget__foot" id="afterFoot"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero__cta">
+    <a class="btn btn--lit btn--lg" href="#start">Try it on my catalog</a>
+    <a class="btn btn--ghost" href="#clerk">Have a full conversation with it</a>
+  </div>
+  <div class="hero__note" data-bind="heroNote"></div>
+</div></header>
+
+<section id="lose"><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Sound familiar</div>
+    <h2>You already know where you lose the sale.</h2>
+    <p class="lede">None of this is an AI problem. It is the plain fact that a website cannot ask a follow up question, and a good salesperson can.</p>
+  </div>
+  <div class="three" data-mount="pains"></div>
+</div></section>
+
+<section class="tight"><div class="wrap" style="padding-top:clamp(40px,5vw,72px)">
+  <div class="shead">
+    <div class="eyebrow">Why it happens</div>
+    <h2>Your search box deletes the reason someone is buying.</h2>
+    <p class="lede">A customer arrives knowing exactly what they need. Your site asks them to throw almost all of it away and type two words instead. In a real store, a good salesperson would just ask.</p>
+  </div>
+  <div class="loss" data-mount="loss"></div>
+</div></section>
+
+<section id="clerk" class="wash"><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Have a go</div>
+    <h2>The whole conversation, start to cart.</h2>
+    <p class="lede">The panel above is the short version. This is all of it: the follow up question, the honest answer that talks a customer out of the wrong product, and the cart at the end. Switch category, or type something one of your own customers has asked you.</p>
+  </div>
+
+  <p class="asklabel">What do you sell?</p>
+  <div class="chips" data-mount="chips2" role="group" aria-label="Choose your store category"></div>
+
+  <div class="clerkgrid">
+    <div class="clerkside">
+      <div class="pain">
+        <div class="pain__k">What this store keeps losing</div>
+        <p class="pain__v" id="painOut"></p>
+      </div>
+      <div class="saidbox">
+        <div class="pain__k">The customer says</div>
+        <p class="said" data-mount="heroLine" aria-live="polite"></p>
+      </div>
+      <div class="ask">
+        <input id="askInput" type="text" maxlength="200" placeholder="Or type what your customers ask you...">
+        <button id="askGo" type="button">Read it</button>
+      </div>
+      <p class="asknote" id="askNote">Type something one of your own customers has actually asked you.</p>
+    </div>
+    <div data-mount="panel"></div>
+  </div>
+</div></section>
+
+
+
+<section><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">What changes for you</div>
+    <h2>Six things, and none of them are technical.</h2>
+  </div>
+  <div class="three" data-mount="gets"></div>
+</div></section>
+
+<section class="wash"><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Is this for your store</div>
+    <h2>We would rather tell you no now.</h2>
+    <p class="lede">There is no setup fee, so the only thing a bad fit costs either of us is time. Here is the honest test.</p>
+  </div>
+  <div class="two" data-mount="fit"></div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">What you actually see</div>
+    <h2>One screen. One question. How much did it make me?</h2>
+    <p class="lede">Not sessions, not conversations, not tokens. Orders and dollars, and you can click any of them and read the conversation that produced it.</p>
+  </div>
+</div>
+<div class="wrap">
+  <div class="board" data-mount="board"></div>
+  <div style="margin-top:clamp(48px,6vw,84px)">
+    <h3 style="margin-bottom:10px;font-size:24px">And the part your analytics cannot tell you</h3>
+    <p class="lede" style="margin-bottom:26px">Search logs show what people typed. Conversations show why they were shopping, and which reasons actually convert.</p>
+    <div class="bars" data-mount="bars"></div>
+  </div>
+</div></section>
+
+<section id="pricing" class="wash"><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Founding merchant pricing</div>
+    <h2>Model it on your own traffic.</h2>
+    <p class="lede">Four numbers you already know. The funnel fills in as you move them, and the only line we ever bill is a percentage of the revenue at the bottom of it.</p>
+  </div>
+  <div data-mount="calc"></div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Works with your stack</div>
+    <h2>Whatever your store runs on.</h2>
+    <p class="lede">You do not move platforms and you do not rebuild anything. WooCommerce and Shopify install today, Magento and BigCommerce are close, and anything custom still works. Pick yours to see what install actually involves.</p>
+  </div>
+  <div class="plats" data-mount="plats" role="group" aria-label="Choose your ecommerce platform"></div>
+  <div data-mount="platbox"></div>
+</div></section>
+
+<div><div class="wrap seats">
+  <div class="seats__in">
+    <div class="seats__n" data-mount="seatCount"></div>
+    <div class="seats__t" data-bind="seatCopy"></div>
+    <div class="dotsrow" data-mount="seatDots" aria-hidden="true"></div>
+  </div>
+</div></div>
+
+<section class="tight"><div class="wrap" style="padding-top:clamp(20px,3vw,40px)">
+  <div class="shead">
+    <div class="eyebrow">The 30 day pilot</div>
+    <h2>Installed in week one. Attributed revenue by week four.</h2>
+    <p class="lede">A sequence, not a roadmap. Each week ends on something you can watch working in your own store.</p>
+  </div>
+  <div class="weeks" data-mount="weeks"></div>
+  <div class="miles" data-mount="miles"></div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Straight answers</div>
+    <h2>The six things every merchant asks.</h2>
+  </div>
+  <div class="faq" data-mount="faqHome"></div>
+  <p class="lede" style="margin-top:34px;font-size:16px">Got a developer or an agency who will want the detail? <a href="#/platform" style="color:var(--intent)">Send them the technical page</a>.</p>
+</div></section>
+
+<section id="start" class="tight"><div class="wrap" data-mount="ctaHome"></div></section>
+
+</div><!-- /home -->
+
+<!-- ============================================================
+     VIEW: PLATFORM  (technical deep dive)
+     ============================================================ -->
+<div data-view="/platform" hidden>
+
+<header class="hero" style="padding:clamp(56px,7vw,100px) 0 clamp(44px,5vw,72px)"><div class="wrap">
+  <a class="crumb" href="#/">← Back to the merchant page</a>
+  <div class="eyebrow">Platform &amp; architecture</div>
+  <h1 style="font-size:clamp(33px,5vw,62px);max-width:20ch;margin-bottom:22px">The commerce layer between AI intent and ecommerce transactions.</h1>
+  <p class="lede" style="max-width:66ch">This page is for the person your merchant forwards this to. It covers the two product surfaces, the tool layer, how attribution is defined and audited, what the model is and is not allowed to do, and the shape of the first build.</p>
+  <div class="hero__cta" style="margin-top:26px">
+    <a class="btn btn--lit" href="#tools">Commerce tool layer</a>
+    <a class="btn btn--ghost" href="#attrib">Attribution rules</a>
+    <a class="btn btn--ghost" href="#adapters">Adapters</a>
+    <a class="btn btn--ghost" href="#security">Security model</a>
+  </div>
+</div></header>
+
+<section><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Two surfaces, one integration</div>
+    <h2>The merchant integrates once. We manage where it sells.</h2>
+    <p class="lede">Product A is what ships now, because it is the surface we control and the fastest way to prove revenue. Product B is the same commerce engine pointed outward once the transaction loop is trusted.</p>
+  </div>
+  <div class="two" data-mount="surfaces"></div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Architecture</div>
+    <h2>The model sits beside the commerce engine, never on top of it.</h2>
+    <p class="lede">Language understanding and tool selection come from a replaceable provider. Everything that touches money, stock or state is deterministic and ours.</p>
+  </div>
+  <div class="arch" data-mount="arch"></div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Positioning, stated plainly</div>
+    <h2>This is not an OpenAI wrapper.</h2>
+    <p class="lede">Model providers are infrastructure and they are interchangeable. The architecture has to let us change one without rewriting the commerce platform. What follows is the actual split.</p>
+  </div>
+  <div class="two" data-mount="ownership"></div>
+</div></section>
+
+<section id="adapters" class="wash"><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Adapters</div>
+    <h2>Platform agnostic, stated as a contract.</h2>
+    <p class="lede">Agnostic is easy to claim and hard to prove, so here is the proof: every adapter implements the same interface, owns three concerns, and touches nothing else. Everything above the adapter is written once. That is why the second adapter cost a fraction of the first, and why an unusual stack is a conversation rather than a rebuild.</p>
+  </div>
+  <div class="contract" data-mount="contract" style="margin-bottom:26px"></div>
+  <div data-mount="methods" style="margin-bottom:34px"></div>
+  <div class="plats" data-mount="plats2" role="group" aria-label="Choose a platform adapter"></div>
+  <div data-mount="platbox2"></div>
+</div></section>
+
+<section id="tools" class="wash"><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Commerce tool layer</div>
+    <h2>The agent gets verbs, not access.</h2>
+    <p class="lede">It never issues a query against the store. It calls a fixed set of narrowly defined tools, each one validated, scoped to a merchant, and logged with the session that invoked it.</p>
+  </div>
+  <div class="tools" data-mount="tools"></div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Recommendation safety</div>
+    <h2>Retrieve, then reason. Never guess.</h2>
+    <p class="lede">Price, availability, variants and compatibility are transactional facts. They come from deterministic commerce APIs, not from the model's memory, which is what keeps the agent from inventing a product you do not sell.</p>
+  </div>
+  <div class="two" data-mount="safety"></div>
+</div></section>
+
+<section id="attrib"><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Attribution</div>
+    <h2>Every order carries a receipt for how it happened.</h2>
+    <p class="lede">Attribution is not a report generated at month end. It is an ID written at the moment of intent that travels all the way into the order record.</p>
+  </div>
+  <div class="chain" data-mount="chain"></div>
+  <div style="margin-top:clamp(40px,5vw,68px)">
+    <h3 style="margin-bottom:10px;font-size:24px">What counts as AI attributed revenue</h3>
+    <p class="lede" style="margin-bottom:28px">This definition determines the invoice, so it is written down, applied consistently, and auditable line by line in the dashboard.</p>
+    <div class="rules" data-mount="rules"></div>
+  </div>
+</div></section>
+
+<section id="security"><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Security model</div>
+    <h2>The destructive operations are not exposed at all.</h2>
+    <p class="lede">Not guarded by a prompt. Not discouraged by an instruction. Absent from the tool schema, so the model has no path to them regardless of what a customer types into the chat.</p>
+  </div>
+  <div class="two" data-mount="guards"></div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">MVP technical shape</div>
+    <h2>Deliberately small. One question to answer.</h2>
+    <p class="lede">Can an AI product expert measurably drive ecommerce transactions? Everything not required to answer that is out of scope for V1.</p>
+  </div>
+  <div class="stackcols" data-mount="stack"></div>
+  <div class="two" style="margin-top:14px" data-mount="notbuilding"></div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">30 day build</div>
+    <h2>First attributable transaction, week four.</h2>
+  </div>
+  <div class="weeks" data-mount="weeks2"></div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Why it compounds</div>
+    <h2>The moat is the loop, not the widget.</h2>
+    <p class="lede">A chat widget is a weekend. A trusted commerce network with attributed outcomes attached to every recommendation is years, and it gets harder to catch with every transaction.</p>
+  </div>
+  <div class="flyw" data-mount="flywheel" style="margin-bottom:34px"></div>
+  <div class="three" data-mount="moat"></div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Technical questions</div>
+    <h2>The rest of the answers.</h2>
+  </div>
+  <div class="faq" data-mount="faqTech"></div>
+</div></section>
+
+<section id="start2" class="tight"><div class="wrap" data-mount="ctaTech"></div></section>
+
+</div><!-- /platform -->
+
+<footer><div class="wrap in">
+  <span class="brand" style="color:var(--text)"><span class="brand__mark"></span><span data-bind="brand"></span></span>
+  <span class="mono" data-bind="footNote" style="font-size:12px"></span>
+  <a href="#/platform">Platform &amp; architecture</a>
+  <span class="mono" style="margin-left:auto;font-size:12px">north star: AI attributed GMV</span>
+</div></footer>
+
+<script>
+/* ============================================================
+   SITE — single source of truth for both views.
+   Nothing below the RENDER divider is content specific.
+   ============================================================ */
+const SITE = {
+  brand: "Clerk",                        // working name, one line to change
+  contact: "you@yourdomain.com",         // pilot requests are mailed here
+  footNote: "Platform agnostic agentic commerce",
+  takeRate: 0.01,
+  saasComparison: 499,
+
+  /* Funnel simulator. Each knob is min/max/default/step plus a formatter.
+     `funnel` derives each stage from the knobs above it. */
+  knobs: [
+    { id:"sessions", label:"Monthly store sessions", min:2000, max:400000, step:1000, val:60000, fmt:v=>v.toLocaleString() },
+    { id:"engage",   label:"Share who open the assistant", min:2, max:40, step:1, val:12, fmt:v=>v+"%" },
+    { id:"convert",  label:"Of those, share who buy", min:1, max:25, step:1, val:8, fmt:v=>v+"%" },
+    { id:"aov",      label:"Average order value", min:20, max:600, step:5, val:120, fmt:v=>"$"+v }
+  ],
+  funnel: [
+    { k:"Store sessions",     from:k=>k.sessions,                          c:"#B9B2E8" },
+    { k:"Open the assistant", from:k=>k.sessions*k.engage/100,             c:"#8E7FEA" },
+    { k:"Get a recommendation", from:k=>k.sessions*k.engage/100*0.78,      c:"#6B4EFF" },
+    { k:"Add to cart",        from:k=>k.sessions*k.engage/100*k.convert/100*1.6, c:"#2FBE93" },
+    { k:"Order",              from:k=>k.sessions*k.engage/100*k.convert/100,     c:"#00A06B" }
+  ],
+  founding: { seats: 10, taken: 0 },
+
+  /* Signal extraction for the hero input. Each rule is a label plus a
+     matcher; add a rule and the parser picks it up with no code change. */
+  signals: [
+    { k:"budget",     re:/(?:under|below|less than|max(?:imum)?|up to|around|about|within)?\s*\$\s?(\d{1,3}(?:,\d{3})*|\d+)/i, fmt:m=>"budget: $"+m[1] },
+    { k:"age",        re:/\b(?:he'?s|she'?s|they'?re|aged?)?\s*(\d{1,2})\s*(?:years? old|yrs?|yo)\b|\bhe'?s (\d{1,2})\b|\bshe'?s (\d{1,2})\b/i, fmt:m=>"age: "+(m[1]||m[2]||m[3]) },
+    { k:"frequency",  re:/(\d+|once|twice|three times|four times)\s*(?:times?\s*)?(?:a|per|each)\s*(week|month|day)/i, fmt:m=>"frequency: "+m[1]+" per "+m[2] },
+    { k:"recipient",  re:/\b(son|daughter|wife|husband|kid|child|brother|sister|friend|dad|mom|myself|nephew|niece)\b/i, fmt:m=>"recipient: "+m[1].toLowerCase() },
+    { k:"level",      re:/\b(beginner|new to|just started|intermediate|advanced|competitive|serious|casual|pro)\b/i, fmt:m=>"level: "+m[1].toLowerCase() },
+    { k:"fit",        re:/\b(wide|narrow|slim|tall|petite|plus size|extra wide)\b/i, fmt:m=>"fit: "+m[1].toLowerCase() },
+    { k:"setting",    re:/\b(indoor|outdoor|home|gym|backyard|travel|office|trail|road)\b/i, fmt:m=>"setting: "+m[1].toLowerCase() },
+    { k:"occasion",   re:/\b(gift|birthday|christmas|present|anniversary|wedding)\b/i, fmt:m=>"occasion: "+m[1].toLowerCase() },
+    { k:"urgency",    re:/\b(today|tomorrow|this week|asap|urgent|by (?:friday|monday|saturday|sunday))\b/i, fmt:m=>"urgency: "+m[1].toLowerCase() },
+    { k:"problem",    re:/\b(broken|worn|slipping|replace|replacement|repair|stopped working|too small|too big)\b/i, fmt:m=>"intent: replacement" }
+  ],
+  stop: "i we my our a an the and or but for with to of need needs want wants looking look get got buy buying he she they him her his their that this is are was were it its im i'm just really very some any what which can could would should about please thanks hi hello".split(" "),
+
+  /* Adapters. status: "live" ships today, "build" is in progress,
+     "generic" is the catch all for any other stack. Flip a status and
+     the tabs, dots and detail card all follow. */
+  platforms: [
+    { id:"woo", name:"WooCommerce", status:"live", badge:"WooCommerce",
+      blurb:"Installed as a plugin, so nothing sits between you and a working install. Your catalog stays exactly where it is.",
+      rows:[
+        ["Install","WordPress plugin, activated from your admin"],
+        ["Auth","Scoped REST credentials, read only on catalog"],
+        ["Catalog","Products, variations, stock and pricing read live"],
+        ["Cart","Native WooCommerce cart, your existing checkout"],
+        ["Attribution","IDs written as order meta on the order record"]
+      ] },
+    { id:"shopify", name:"Shopify", status:"live", badge:"Shopify",
+      blurb:"Installed as an embedded app, with the storefront widget added through a theme app extension. No theme surgery required.",
+      rows:[
+        ["Install","Embedded app plus theme app extension"],
+        ["Auth","OAuth, scoped access, read only on catalog"],
+        ["Catalog","Products, variants, inventory and pricing via Admin and Storefront APIs"],
+        ["Cart","Storefront API cart, your existing Shopify checkout"],
+        ["Attribution","Cart attributes carried onto the order, reconciled server side against the order webhook"]
+      ] },
+    { id:"magento", name:"Magento / Adobe Commerce", status:"build", badge:"Magento",
+      blurb:"Ships as a Composer module, because Magento persists custom data through service contracts rather than loose key-value pairs. That makes attribution more work to build and more durable once it is there.",
+      rows:[
+        ["Install","Composer module, installed like any other extension"],
+        ["Auth","Integration token with scoped ACL, read only on catalog"],
+        ["Catalog","Products, configurable options, stock and pricing via REST and GraphQL"],
+        ["Cart","Guest cart through the quote API, handed to your existing checkout"],
+        ["Attribution","IDs persisted as order extension attributes declared by the module"]
+      ] },
+    { id:"bigcommerce", name:"BigCommerce", status:"build", badge:"BigCommerce",
+      blurb:"Single click app install with a storefront script. Server side cart creation means the handoff into your checkout is a redirect rather than a rebuild.",
+      rows:[
+        ["Install","App install plus a storefront script"],
+        ["Auth","OAuth API account, read only on catalog"],
+        ["Catalog","Catalog API for products, variants, stock and pricing"],
+        ["Cart","Server side cart, redirected into your existing checkout"],
+        ["Attribution","IDs written to cart and order metafields"]
+      ] },
+    { id:"generic", name:"Any other store", status:"generic", badge:"Custom",
+      blurb:"Custom, headless or in house. If your store can expose a catalog and accept a cart, it can run this. The intelligence layer does not care what is underneath it.",
+      rows:[
+        ["Install","A script tag on your site, plus API access or a product feed"],
+        ["Auth","An API key you issue, scoped to reads"],
+        ["Catalog","Your own REST or GraphQL endpoints, or a scheduled product feed"],
+        ["Cart","Deep link into your cart or checkout with the selected items"],
+        ["Attribution","Session ID passed on handoff, reconciled against your order webhook or export"]
+      ] }
+  ],
+
+  /* What every adapter must implement. This is the agnosticism claim,
+     stated as a contract rather than a promise. */
+  adapterContract: {
+    owns: ["Authentication and credential scoping","Catalog normalization into the common product shape","How attribution is persisted on that platform"],
+    shared: ["Intent extraction","Retrieval and ranking","Conversation and tool selection","Permissions","Attribution reconciliation","Dashboard and analytics"],
+    methods: ["authenticate()","syncCatalog()","searchProducts()","getProduct()","getVariations()","checkInventory()","getPrice()","createCart()","addToCart()","createCheckout()","writeAttribution()","readOrder()"]
+  },
+
+  heroEyebrow: "For ecommerce store owners",
+  heroSub: "Your best salesperson knows the catalog cold and asks the right questions. Your website does not. <b>Clerk</b> puts that salesperson on your store, in your branding, working from your real stock and prices. <b>You pay 1% of what it sells and nothing else.</b>",
+  heroNote: "No setup fee · No monthly fee · Cancel whenever you want",
+  seatCopy: "stores in the founding group. Free setup, you talk to the people building it, and your 1% rate is locked for as long as you stay. We are keeping it small so every store gets properly looked after.",
+
+  /* Each demo drives the h1 AND the panel. The h1 is the customer's
+     opening sentence, so switching intents rewrites the headline. */
+  /* One per store category. `pain` is the merchant-facing reason this
+     category needs it. Adding a category is one entry, nothing else. */
+  demos: [
+    { chip:"Sporting goods", store:"Sideline Sports Co.", order:"$104.00", items:1,
+      pain:"Parents buying for a kid they cannot measure",
+      turns:[
+      { who:"c", text:"My son just joined a competitive team. He's 9, plays point guard indoors, has wide feet, and I need to stay under $120." },
+      { who:"a", text:"Indoor guard shoe, wide fit, room to grow. Let me check what's in stock in his size.",
+        parse:["sport: basketball","age: 9","position: guard","fit: wide","budget: under $120"] },
+      { who:"a", text:"Three that fit. The first is my pick, lightest of the three and cut for quick guards.",
+        products:[
+          {n:"Ryse Court Low",m:"Youth 4W · in stock",p:"$104",c:"#00A06B",i:"01",best:true},
+          {n:"Anchor Pro 2",m:"Youth 4W · in stock",p:"$118",c:"#6B4EFF",i:"02"},
+          {n:"Baseline GT",m:"Youth 4 · 2 left",p:"$89",c:"#F59331",i:"03"} ] },
+      { who:"c", text:"What's the difference between the first two?" },
+      { who:"a", text:"The Anchor sits higher with more cushioning, better for a forward taking contact. The Ryse is 60g lighter with a flatter outsole, which is what a guard changing direction wants." },
+      { who:"c", text:"The first one, wide, size 4." },
+      { who:"a", text:"Added. Ryse Court Low, youth 4 wide. Free shipping starts at $100 so you're covered.",
+        cart:{line:"Ryse Court Low · 4W",price:"$104.00",ship:"Free",total:"$104.00"} }
+    ]},
+
+    { chip:"Auto parts", store:"Rowan Auto Parts", order:"$187.40", items:2,
+      pain:"Wrong fitment returns eating your margin",
+      turns:[
+      { who:"c", text:"I need front brake pads for a 2014 Silverado 1500, 4WD. It's my work truck so I tow a lot." },
+      { who:"a", text:"Towing changes the answer here. The 4WD and the 6-lug versus 8-lug matter for this year, so let me confirm fitment before I recommend anything.",
+        parse:["year: 2014","vehicle: Silverado 1500","drive: 4WD","use: towing"] },
+      { who:"a", text:"Confirmed fitment for yoursetup. For towing I'd skip the ceramic economy set, it fades under load.",
+        products:[
+          {n:"Severe Duty Semi-Met Pads",m:"verified fit · in stock",p:"$118",c:"#00A06B",i:"01",best:true},
+          {n:"Ceramic Street Pads",m:"verified fit · in stock",p:"$74",c:"#6B4EFF",i:"02"},
+          {n:"Front Rotor Pair",m:"pairs with either set",p:"$69",c:"#F59331",i:"03"} ] },
+      { who:"c", text:"Do I need the rotors too?" },
+      { who:"a", text:"Only if yours are below spec or you feel a pulse in the pedal. If they've never been turned at 90k miles, most shops replace rather than resurface." },
+      { who:"c", text:"Add the severe duty pads and the rotors." },
+      { who:"a", text:"Added, both verified against your truck. Nothing in this cart can be a wrong-fit return.",
+        cart:{line:"Pads + front rotor pair",price:"$187.00",ship:"Free",total:"$187.40"} }
+    ]},
+
+    { chip:"Beauty & skincare", store:"Lumen Skin", order:"$96.00", items:2,
+      pain:"Customers guessing at their own skin type",
+      turns:[
+      { who:"c", text:"My skin is oily in the T-zone but flaky on my cheeks, and everything with fragrance makes me red. I have no idea what to buy." },
+      { who:"a", text:"That's combination skin with a sensitivity flag, which rules out a lot of what's popular right now. I'll keep everything fragrance free.",
+        parse:["type: combination","concern: sensitivity","avoid: fragrance","stage: first routine"] },
+      { who:"a", text:"Start with two, not five. Adding one product at a time is how you find out what your skin actually reacts to.",
+        products:[
+          {n:"Barrier Gel Cleanser",m:"fragrance free · in stock",p:"$28",c:"#00A06B",i:"01",best:true},
+          {n:"Lightweight Ceramide Cream",m:"fragrance free · in stock",p:"$68",c:"#6B4EFF",i:"02"},
+          {n:"10% Niacinamide Serum",m:"add later, not now",p:"$34",c:"#F59331",i:"03"} ] },
+      { who:"c", text:"Why not the serum too?" },
+      { who:"a", text:"Because if something stings you won't know which product did it. Give these two three weeks, then add the serum. It'll still be here." },
+      { who:"c", text:"That's actually helpful. Both please." },
+      { who:"a", text:"Added. Cleanser and moisturiser, both fragrance free.",
+        cart:{line:"Cleanser + ceramide cream",price:"$96.00",ship:"Free",total:"$96.00"} }
+    ]},
+
+    { chip:"Home improvement", store:"Beckett Hardware", order:"$142.85", items:3,
+      pain:"How much do I need, asked forty times a day",
+      turns:[
+      { who:"c", text:"Painting my living room, roughly 14 by 18 with 9 foot ceilings. One accent wall in a dark navy over beige. How much do I need?" },
+      { who:"a", text:"About 576 square feet of wall. Dark over light needs primer or you'll be doing four coats.",
+        parse:["room: 14x18","ceiling: 9ft","coverage: ~576 sq ft","note: dark over light"] },
+      { who:"a", text:"Two gallons for the main walls, one quart plus primer for the accent. That's sized to your room, not a guess.",
+        products:[
+          {n:"Interior Eggshell, 2 gal",m:"tinted to order",p:"$96",c:"#00A06B",i:"01",best:true},
+          {n:"Bonding Primer, 1 qt",m:"required for navy",p:"$21",c:"#6B4EFF",i:"02"},
+          {n:"Roller + tray kit",m:"9in, for eggshell",p:"$26",c:"#F59331",i:"03"} ] },
+      { who:"c", text:"Do I really need primer for one wall?" },
+      { who:"a", text:"For navy over beige, yes. Without it you're buying a third gallon of navy, which costs more than the primer." },
+      { who:"c", text:"Fair. All three." },
+      { who:"a", text:"Added, sized to your room. No second trip.",
+        cart:{line:"Paint + primer + kit",price:"$143.00",ship:"Store pickup",total:"$142.85"} }
+    ]},
+
+    { chip:"Pet supplies", store:"Barkwell Pet Co.", order:"$78.99", items:1,
+      pain:"Ingredient questions your team answers all week",
+      turns:[
+      { who:"c", text:"My lab is 11 now, slowing down on walks, and chicken gives her itchy skin. She's about 70 pounds." },
+      { who:"a", text:"Senior, large breed, chicken sensitivity. Joint support matters at 11, and a lot of \"limited ingredient\" foods still use chicken fat.",
+        parse:["age: senior","weight: 70lb","avoid: chicken","need: joint support"] },
+      { who:"a", text:"These three are genuinely chicken free, fat included. I checked.",
+        products:[
+          {n:"Senior Salmon & Oat, 24lb",m:"no chicken · in stock",p:"$79",c:"#00A06B",i:"01",best:true},
+          {n:"Lamb Limited Ingredient, 22lb",m:"no chicken · in stock",p:"$74",c:"#6B4EFF",i:"02"},
+          {n:"Joint Support Chews",m:"add on",p:"$32",c:"#F59331",i:"03"} ] },
+      { who:"c", text:"Will switching upset her stomach?" },
+      { who:"a", text:"Usually if you switch fast. Mix a quarter new with three quarters old for four days, then half and half. A 24lb bag gives you room to do it properly." },
+      { who:"c", text:"The salmon one." },
+      { who:"a", text:"Added. Chicken free including the fat source.",
+        cart:{line:"Senior Salmon & Oat · 24lb",price:"$79.00",ship:"Free",total:"$78.99"} }
+    ]},
+
+    { chip:"Electronics", store:"Northline Electronics", order:"$849.00", items:1,
+      pain:"Spec sheets no customer can decode",
+      turns:[
+      { who:"c", text:"Laptop for my daughter starting a graphic design program. Budget is around $900 and I don't understand any of the specs." },
+      { who:"a", text:"For design the two that matter are memory and screen colour accuracy. Processor differences barely show up in her work.",
+        parse:["use: graphic design","budget: ~$900","buyer: parent","priority: needs guidance"] },
+      { who:"a", text:"Skip the gaming machines. She needs 16GB and a good panel, not a fast GPU.",
+        products:[
+          {n:"Aster 14 · 16GB / 512GB",m:"100% sRGB panel · in stock",p:"$849",c:"#00A06B",i:"01",best:true},
+          {n:"Aster 14 · 8GB / 256GB",m:"same screen, less memory",p:"$699",c:"#6B4EFF",i:"02"},
+          {n:"Vantage Gaming 15",m:"fast, wrong tool",p:"$899",c:"#F59331",i:"03"} ] },
+      { who:"c", text:"Is the cheaper one really that different?" },
+      { who:"a", text:"For a design program, yes. 8GB means Illustrator and Photoshop open together will crawl, and memory isn't upgradeable on this model. It's the one spec worth the extra $150." },
+      { who:"c", text:"Then the 16GB one." },
+      { who:"a", text:"Added. She'll be fine for the whole program on this.",
+        cart:{line:"Aster 14 · 16GB / 512GB",price:"$849.00",ship:"Free",total:"$849.00"} }
+    ]}
+  ],
+
+  /* what the search box throws away */
+  loss: {
+    sentence: "My son just joined a competitive team. He's 9, plays point guard indoors three times a week, has wide feet, and I want to stay under $100.",
+    attrs: ["age 9","point guard","indoor","3x per week","competitive","wide feet","under $100","first pair"],
+    keyword: "basketball shoes",
+    badLabel: "What your search box keeps",
+    goodLabel: "What the conversation keeps",
+    badNote: "Everything else is discarded before your catalog ever sees it.",
+    goodNote: "All of it reaches the catalog, so the recommendation can actually be right."
+  },
+
+  /* Named in the owner's words, not ours. `stat` is the consequence. */
+  pains: [
+    { t:"They ask, then they leave", p:"Somebody types a real question into your search box, gets 340 results sorted by nothing, and closes the tab. You never find out what they wanted." },
+    { t:"The same five questions, forever", p:"Will this fit my car. Is this okay for sensitive skin. How much do I need. Your team answers these all day, and nights and weekends nobody answers them at all." },
+    { t:"Returns you could have prevented", p:"Wrong size, wrong fitment, wrong product for the job. Every one of those was a question that did not get asked before checkout." },
+    { t:"You know the answer, the site does not", p:"You could sell this customer in ninety seconds standing in a shop. Your website has no way to do what you do." },
+    { t:"Traffic that never converts", p:"You pay for the visit either way. The gap between a visitor and an order is usually one question nobody was there to answer." },
+    { t:"No idea why people buy", p:"Analytics tells you what they clicked. It cannot tell you they were shopping for a nine year old with wide feet on a budget." }
+  ],
+
+  fit: [
+    { t:"This works for you if", ok:true, pill:"good fit", items:[
+      "Choosing the right product takes some knowledge",
+      "You sell variants, sizes, fitment or compatibility",
+      "Your catalog is big enough that browsing is a chore",
+      "Customers email or chat you questions before buying",
+      "Returns from wrong choices cost you real money",
+      "You do at least a few hundred orders a month"
+    ]},
+    { t:"Probably not worth it if", ok:false, pill:"honest answer", items:[
+      "You sell one product with one option",
+      "People arrive already knowing the exact SKU",
+      "Price is the only thing anyone compares",
+      "Your traffic is small enough that you can reply personally",
+      "You are pre launch with no orders yet"
+    ]}
+  ],
+
+  gets: [
+    { t:"More of your visitors buy", p:"The ones who would have bounced at the search results get an answer instead. Same traffic, same ad spend, more orders out the other end." },
+    { t:"Fewer returns", p:"It confirms fitment, size and suitability before the cart, in the same conversation. The wrong-product return is the one you stop paying for first." },
+    { t:"Your team stops repeating itself", p:"The questions your staff answer forty times a week get answered at 2am, correctly, from your real stock. They handle the ones that actually need a person." },
+    { t:"You see why people buy", p:"Not what they clicked. What they were trying to solve, in their words, and which of those reasons turn into orders. That changes what you stock." },
+    { t:"Nothing about your store changes", p:"Same platform, same checkout, same payments, same fulfillment. It sits on top and hands finished carts to the setup you already run." },
+    { t:"You only pay out of sales it made", p:"No setup fee, no monthly fee. One percent of the orders we can show you came from a conversation, and you can open any one of them and read it." }
+  ],
+
+  board: [
+    { k:"AI attributed revenue", v:47218, pre:"$", hero:true, d:"Last 30 days, orders traced to a conversation" },
+    { k:"AI orders", v:384 },
+    { k:"Shopping sessions", v:4821 },
+    { k:"AI conversion rate", v:7.96, suf:"%", dec:2 },
+    { k:"Average AI order", v:123, pre:"$" },
+    { k:"Add to carts", v:1104 },
+    { k:"Your fee this month", v:472.18, pre:"$", dec:2, d:"1% of attributed revenue" }
+  ],
+
+  intents: [
+    { l:"shoes under $100", n:1201, cv:"14.1%" },
+    { l:"youth basketball shoes", n:1422, cv:"11.2%" },
+    { l:"guard shoes, lightweight", n:812, cv:"12.4%" },
+    { l:"wide foot basketball shoes", n:618, cv:"9.8%" },
+    { l:"beginner basketball shoes", n:412, cv:"6.7%" }
+  ],
+
+  weeks: [
+    { n:"Week 1", t:"Commerce foundation", items:["Connector + merchant auth","Catalog ingestion","Search, variants, pricing","Live inventory","Normalized commerce API"], g:"Ask for basketball shoes under $100 for a child and get real products from your store." },
+    { n:"Week 2", t:"AI storefront", items:["Embeddable widget","Your branding","Conversation sessions","Agent orchestrator","Comparison + product cards"], g:"A customer can hold an intelligent shopping conversation against your real catalog." },
+    { n:"Week 3", t:"Commerce", items:["Create and modify cart","Checkout handoff","Session attribution","Recommendation attribution","Order attribution"], g:"A conversation produces a real order in your store with the trail attached." },
+    { n:"Week 4", t:"Merchant product", items:["Onboarding","Dashboard","Funnel analytics","AI GMV","Fee calculation"], g:"You can see exactly what the AI earned, and check the arithmetic yourself." }
+  ],
+
+  miles: [
+    { b:"30 days", s:"1 merchant, 1 attributed transaction" },
+    { b:"60 days", s:"3 to 5 merchants, repeat transactions" },
+    { b:"90 days", s:"10 merchants, $100K cumulative AI GMV" }
+  ],
+
+  /* ---------- technical view ---------- */
+  surfaces: [
+    { tag:"Shipping now", ok:true, t:"Product A · AI Storefront",
+      p:"A merchant branded product expert embedded in the store. We control the UX, the conversation, the model choice, the retrieval, the cart and the measurement, which is exactly why it goes first: it is the fastest honest answer to whether conversational commerce increases revenue.",
+      items:["Customer never leaves your site","No ChatGPT or Claude account needed","Your branding, your checkout","Full control of experimentation and analytics"] },
+    { tag:"Phase 3", ok:false, t:"Product B · AI Distribution",
+      p:"The same commerce engine pointed outward, exposing catalog and transaction capability to external agents. Strategically larger, but we do not control those platforms, so it follows proof rather than leading it.",
+      items:["ChatGPT, Claude and future assistants","Shopping agents and AI operating systems","One merchant integration, many channels","Distribution fee on externally originated orders"] }
+  ],
+
+  arch: [
+    { n:"Customer", d:"on the merchant website" },
+    { n:"AI Storefront widget", d:"JavaScript embed, merchant branded", ours:true },
+    { n:"API gateway", d:"auth, rate limiting, merchant scoping", ours:true },
+    { split:[
+      { n:"Agent service", d:"orchestration, tool selection, conversation state", ours:true },
+      { n:"LLM provider", d:"replaceable: OpenAI, Anthropic, next" }
+    ]},
+    { n:"Commerce service", d:"search · catalog · cart · attribution", ours:true },
+    { n:"Commerce adapter", d:"one interface: WooCommerce · Shopify · Magento · BigCommerce · generic", ours:true },
+    { n:"Your store", d:"system of record: products, orders, payments, fulfillment" }
+  ],
+
+  ownership: [
+    { t:"Replaceable infrastructure", ok:false, pill:"swappable",
+      items:["Language understanding","Reasoning over retrieved data","Conversational phrasing","Tool selection"] },
+    { t:"What we own", ok:true, pill:"the product",
+      items:["Commerce orchestration","Product retrieval and ranking","Merchant integrations and catalog normalization","Business rules and permissions","Transaction flows","Attribution and analytics","Experimentation","Agent distribution"] }
+  ],
+
+  tools: [
+    { t:"Product tools", items:["search_products()","get_product()","get_variations()","compare_products()","check_inventory()","get_price()"] },
+    { t:"Shopping tools", items:["create_cart()","add_to_cart()","remove_from_cart()","update_quantity()","apply_coupon()","create_checkout()"] },
+    { t:"Knowledge tools", items:["search_store_policy()","get_shipping_information()","get_return_policy()","get_product_knowledge()"], soon:["get_order()","track_order()","request_return()","recommend_bundle()","find_substitute()"] }
+  ],
+
+  safety: [
+    { t:"How it works", ok:true, pill:"deterministic",
+      items:["Understand intent from the conversation","Retrieve from merchant data via commerce APIs","Reason only over what was retrieved","Recommend with the reason recorded"] },
+    { t:"What it never does", ok:false, pill:"blocked",
+      items:["State a price from memory","Assert stock it did not check","Invent a variant or a size","Describe a product you do not carry","Promise a policy it cannot cite"] }
+  ],
+
+  chain: [
+    { i:"Step 1", t:"Intent", p:"The customer describes the situation in their own words and the session opens.", c:"merchant_id · ai_session_id · conversation_id" },
+    { i:"Step 2", t:"Recommendation", p:"The agent queries the live catalog and puts specific SKUs forward, with position and reason recorded.", c:"recommendation_id · product_id · position · reason" },
+    { i:"Step 3", t:"Cart", p:"A real cart on your own platform, carrying the session that created it.", c:"cart_id · ai_session_id" },
+    { i:"Step 4", t:"Order", p:"Merchant checkout, merchant processor. The order record carries the trail into the database.", c:"ai_attributed = true · attribution_source", end:true }
+  ],
+
+  rules: [
+    { t:"Direct AI conversion", verdict:"Attributed", kind:"y",
+      flow:["AI recommends product A","Customer adds A through the AI experience","Customer purchases A"],
+      p:"The unambiguous case. The cart itself was created by the session." },
+    { t:"AI assisted conversion", verdict:"Potentially attributed", kind:"m",
+      flow:["AI recommends product A","Customer opens the normal product page","Customer buys A inside the attribution window"],
+      p:"Governed by a stated window and visible in the dashboard as assisted, separated from direct so you can judge it yourself." },
+    { t:"Unrelated purchase", verdict:"Not attributed", kind:"n",
+      flow:["AI recommends product A","Customer returns later in a separate session","Customer buys product Z"],
+      p:"Not attributed automatically. We would rather under claim than send an invoice a merchant can argue with." }
+  ],
+
+  guards: [
+    { t:"Exposed to the agent", pill:"allowed", ok:true,
+      items:["Search products","Retrieve details and variations","Retrieve pricing","Check inventory","Create a cart","Modify a cart","Create a checkout"] },
+    { t:"Never exposed", pill:"restricted", ok:false,
+      items:["Change prices","Delete products","Modify inventory","Export customer data","Change payment settings","Issue refunds","Any write outside a cart"] }
+  ],
+
+  stack: [
+    { t:"Services", items:["Merchant website + JS widget","API gateway","Agent service → LLM API","Commerce service","Platform connectors"] },
+    { t:"Data", items:["Postgres: merchants, sessions, conversations","Postgres: recommendations, attribution, orders","Redis: sessions, caching, rate limiting","Events: impression, recommendation, product_click","Events: add_to_cart, checkout, purchase"] }
+  ],
+
+  notbuilding: [
+    { t:"Not in V1", pill:"out of scope", ok:false,
+      items:["Autonomous refunds","Customer service suite","CRM and email marketing","ERP and fulfillment","Sophisticated personalization","Autonomous pricing","Five ecommerce integrations","Custom model training"] },
+    { t:"V1 answers one question", pill:"in scope", ok:true,
+      items:["Can an AI product expert measurably drive transactions","Does a conversation convert better than a search session","What does attribution need to look like to be trusted","What does onboarding actually take"] }
+  ],
+
+  flywheel: ["More merchants","More products","More conversations","More intent data","More transactions","Better recommendations","Higher merchant revenue"],
+
+  moat: [
+    { t:"Integrations", p:"Deep connections into merchant commerce systems, normalized across platforms. Slow to build, slow to displace." },
+    { t:"Attribution", p:"Trusted measurement of AI generated revenue. Once a merchant bills against your numbers, your numbers are the system of record." },
+    { t:"Outcome data", p:"Intent joined to transaction. Knowing which recommendations convert for which reasons is the asset the model providers do not have." }
+  ],
+
+  faqHome: [
+    { q:"Is this just another chatbot widget?", a:"A support chatbot answers questions about your policies. This one sells: it reads your live catalog, narrows to specific products you actually have in stock, and builds the cart. If it sells nothing you pay nothing, which is not a deal a chatbot vendor will offer you." },
+    { q:"How long does this take to set up?", a:"An install and about an hour of your time to talk through your catalog and how you would want a good salesperson to sell it. You are not writing scripts, building flows, or training anything." },
+    { q:"Do I have to change platforms?", a:"No. WooCommerce or Shopify keeps handling products, inventory, pricing, orders, payments and fulfillment. We add a layer above it and never write to your store outside of carts." },
+    { q:"Which platforms are supported?", a:"WooCommerce and Shopify are live today, Magento and BigCommerce are in build, and anything else runs on the generic adapter, which needs only a catalog we can read and a cart we can hand off to. If your store can do those two things, it can run this." },
+    { q:"Do my customers need a ChatGPT account?", a:"No. The experience is embedded in your site under your branding. The customer just visits your store as they always have." },
+    { q:"What if nobody uses it?", a:"Then we do not get paid. There is no setup fee and no monthly fee, so the cost of finding out is your time and a plugin install." },
+    { q:"Can it recommend something I do not sell?", a:"It can only see and recommend from your live catalog, with real stock and real prices coming from your store rather than from the model. You can also exclude products or whole categories from it." },
+    { q:"How do I know the revenue is really yours?", a:"Every session, recommendation, cart and order carries an ID written at the time it happened. Open any billed order in the dashboard and read the conversation that produced it." },
+    { q:"What do you need from me to start?", a:"A plugin install, API credentials scoped to the capabilities listed on the platform page, and about an hour to talk through your catalog and how you would want a good salesperson to sell it." }
+  ],
+
+  faqTech: [
+    { q:"Which model do you use?", a:"Whichever performs best for the task at the time, and it is a configuration choice rather than an architectural one. The agent service holds orchestration and tool selection so the provider can change without touching the commerce platform." },
+    { q:"Is this just ChatGPT embedded in my website?", a:"A model may power parts of the reasoning, but the platform controls retrieval, commerce tools, permissions, transactions, attribution and analytics. The model is one replaceable component of the system." },
+    { q:"How much of this is platform specific?", a:"Three concerns and nothing else: auth, catalog normalization, and how attribution is persisted. Everything above that is written once. The adapter interface on the platform page is the full surface area, so you can judge the claim rather than take it." },
+    { q:"We are on a custom or headless stack. Does that rule us out?", a:"No. The generic adapter reads your catalog from your own endpoints or a scheduled product feed, and hands the finished cart back as a deep link into your checkout. Attribution rides along on the handoff and is reconciled server side against your order webhook or export." },
+    { q:"What stops the agent from hallucinating a price?", a:"Prices, stock, variants and compatibility are only ever read from commerce APIs at request time. The model reasons over retrieved data and is not asked to recall product facts." },
+    { q:"What does the widget cost in page performance?", a:"It loads asynchronously after your page and does not block rendering. Catalog reads are cached and served from our side rather than hammering your store on every keystroke." },
+    { q:"What happens to the data?", a:"Conversations and attribution belong to the merchant relationship and are visible in the dashboard. Aggregate intent patterns are what improve recommendations over time, which is exactly the asset that makes later recommendations better." }
+  ]
+};
+
+/* ============================================================
+   RENDER — generic. No content below this line.
+   ============================================================ */
+const $  = (s,r=document)=>r.querySelector(s);
+const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
+const el = (t,c,h)=>{const n=document.createElement(t);if(c)n.className=c;if(h!=null)n.innerHTML=h;return n;};
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const money = (n,d=0)=>"$"+n.toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});
+const mount = (name)=>$('[data-mount="'+name+'"]');
+
+$$("[data-bind]").forEach(n=>{ n.innerHTML = SITE[n.dataset.bind] ?? ""; });
+document.title = SITE.brand + " — an AI salesperson for your ecommerce store";
+
+/* ---------- router ---------- */
+function show(to){
+  $$("[data-view]").forEach(v=>v.hidden = v.dataset.view !== to);
+  $$("[data-route]").forEach(a=>a.setAttribute("aria-current", a.dataset.route===to ? "page" : "false"));
+}
+function route(){
+  const h = location.hash;
+  const path = h.startsWith("#/") ? h.slice(1) : (h ? null : "/");
+
+  if(path === null){                              // plain anchor, not a route
+    const target = document.getElementById(h.slice(1));
+    const owner = target && target.closest("[data-view]");
+    if(owner && owner.hidden){                    // anchor lives on the other view
+      show(owner.dataset.view);
+      observeAll();
+      requestAnimationFrame(()=>target.scrollIntoView({behavior:reduce?"auto":"smooth"}));
+    }
+    return;
+  }
+
+  const to = $('[data-view="'+path+'"]') ? path : "/";
+  show(to);
+  window.scrollTo(0,0);
+  observeAll();
+}
+addEventListener("hashchange", route);
+
+/* ---------- hero demo ---------- */
+let active = 0, timers = [];
+const headline = mount("heroLine");
+
+mount("panel").outerHTML = `
+<div class="panel">
+  <div class="panel__head">
+    <span class="brand__mark" style="width:16px;height:16px;border-radius:5px"></span>
+    <span class="panel__store" id="panelStore"></span>
+    <span class="panel__plat" id="panelPlat"></span>
+    <span class="panel__tag">scripted demo</span>
+    <button class="replay" id="replay" type="button">↻ Replay</button>
+  </div>
+  <div class="thread" id="thread"></div>
+  <aside class="ledger"><div class="ledger__t">What this conversation did</div><div id="stamps"></div></aside>
+</div>`;
+const thread = $("#thread"), stamps = $("#stamps");
+
+function paintChips(){
+  ["chips","chips2"].forEach(t=>{
+    const box = mount(t); if(!box) return;
+    box.innerHTML = SITE.demos.map((d,i)=>
+      `<button class="chip" type="button" data-cat="${i}" aria-pressed="${i===active}">${d.chip}</button>`).join("");
+  });
+  $$("[data-cat]").forEach(b=>b.onclick = ()=>{
+    active = +b.dataset.cat;
+    heroAuto = false;
+    paintChips(); run(); paintHero();
+    const n = $("#askNote"); if(n) n.textContent = "Type something one of your own customers has actually asked you.";
+  });
+}
+const syncChips = paintChips;
+paintChips();
+
+function typeInto(node, text, done){
+  if(reduce){ node.textContent = '"'+text+'"'; done && done(); return; }
+  node.innerHTML = '<span class="q">"</span><span class="t"></span><span class="caret"></span>';
+  const t = node.querySelector(".t"); let i = 0;
+  const tick = ()=>{
+    t.textContent = text.slice(0,++i);
+    if(i < text.length) timers.push(setTimeout(tick, 14));
+    else { const c=node.querySelector(".caret"); if(c) c.remove(); t.insertAdjacentHTML("afterend",'<span class="q">"</span>'); done && done(); }
+  };
+  tick();
+}
+
+function bubble(turn){
+  const m = el("div","msg msg--"+turn.who);
+  m.append(el("div","who", turn.who==="c" ? "Customer" : SITE.brand));
+  const b = el("div","msg__b", turn.text || "");
+  m.append(b);
+  if(turn.parse){
+    const p = el("div","parse");
+    turn.parse.forEach(x=>p.append(el("span",null,x)));
+    b.append(p);
+  }
+  if(turn.products){
+    const w = el("div","prods");
+    turn.products.forEach(pr=>{
+      const c = el("div","prod"+(pr.best?" prod--best":""));
+      const sw = el("div","prod__sw",pr.i); sw.style.background = pr.c; c.append(sw);
+      const mid = el("div");
+      mid.append(el("div","prod__n", pr.n + (pr.best?' <span class="best">best fit</span>':"")));
+      mid.append(el("div","prod__m", pr.m));
+      c.append(mid, el("div","prod__p", pr.p));
+      w.append(c);
+    });
+    m.append(w);
+  }
+  if(turn.cart){
+    const c = el("div","cart");
+    c.append(el("div","cart__r","<span>"+turn.cart.line+"</span><span>"+turn.cart.price+"</span>"));
+    c.append(el("div","cart__r","<span>Shipping</span><span>"+turn.cart.ship+"</span>"));
+    c.append(el("div","cart__r cart__r--t","<span>Cart total</span><span>"+turn.cart.total+"</span>"));
+    const go = el("button","btn btn--lit btn--sm cart__cta","Checkout on your store →");
+    go.type="button";
+    go.onclick=()=>alert("In production this opens the merchant's own checkout, on their own platform, with the attribution IDs attached to the order.");
+    c.append(go);
+    m.append(c);
+  }
+  return m;
+}
+const fee = t => "$" + (parseFloat(String(t).replace(/[^0-9.]/g,"")) * SITE.takeRate).toFixed(2);
+function stamp(k,v,win){
+  const s = el("div","stamp"+(win?" stamp--win":""));
+  s.append(el("div","stamp__k",k), el("div","stamp__v",v));
+  stamps.append(s);
+}
+function run(){
+  timers.forEach(clearTimeout); timers=[];
+  thread.innerHTML=""; stamps.innerHTML="";
+  const d = SITE.demos[active];
+  const ps = $("#panelStore"); if(ps) ps.textContent = d.store;
+  const pn = $("#painOut"); if(pn) pn.textContent = d.pain;
+  typeInto(headline, d.turns[0].text);
+  let t = reduce ? 0 : d.turns[0].text.length*14 + 260;
+  thread.append(bubble(d.turns[0]));
+  d.turns.slice(1).forEach(turn=>{
+    if(turn.who==="a"){
+      timers.push(setTimeout(()=>{
+        const dots = el("div","dots","<i></i><i></i><i></i>");
+        thread.append(dots);
+        timers.push(setTimeout(()=>{
+          dots.remove(); thread.append(bubble(turn));
+          if(turn.parse) stamp("Understood the situation", turn.parse.length + " signals, no filters used");
+          if(turn.products) stamp("Recommended from your catalog", turn.products.length + " products, all in stock");
+          if(turn.cart) timers.push(setTimeout(()=>{
+            stamp("Built the cart", d.items + (d.items===1?" item":" items") + ", your checkout");
+            stamp("Order placed", d.order, true);
+            stamp("What you pay us", fee(d.order) + " (1% of it)");
+          }, 900));
+        }, reduce?0:620));
+      }, t));
+      t += reduce ? 0 : 1750;
+    } else {
+      timers.push(setTimeout(()=>thread.append(bubble(turn)), t));
+      t += reduce ? 0 : 1350;
+    }
+  });
+}
+$("#replay").onclick = run;
+run();
+
+/* ---------- visitor writes their own intent ---------- */
+function extract(text){
+  const out = [];
+  SITE.signals.forEach(sig=>{
+    const m = text.match(sig.re);
+    if(m) out.push(sig.fmt(m));
+  });
+  const words = text.toLowerCase().replace(/[^a-z0-9\s'-]/g," ").split(/\s+/)
+    .filter(w=>w.length>2 && !SITE.stop.includes(w) && !/^\d+$/.test(w));
+  const subject = [...new Set(words)].slice(0,3);
+  if(subject.length) out.unshift("looking for: " + subject.join(" "));
+  return out;
+}
+function nearestDemo(text){
+  const w = new Set(text.toLowerCase().split(/\W+/));
+  let best = 0, score = -1;
+  SITE.demos.forEach((d,i)=>{
+    const hay = d.turns.map(t=>t.text).join(" ").toLowerCase().split(/\W+/);
+    const n = hay.filter(x=>x.length>3 && w.has(x)).length;
+    if(n > score){ score = n; best = i; }
+  });
+  return best;
+}
+function runCustom(text){
+  timers.forEach(clearTimeout); timers=[];
+  thread.innerHTML=""; stamps.innerHTML="";
+  syncChipsOff();
+  const ps = $("#panelStore"); if(ps) ps.textContent = SITE.demos[nearestDemo(text)].store;
+  typeInto(headline, text);
+
+  const parsed = extract(text);
+  const near = SITE.demos[nearestDemo(text)];
+  const t0 = reduce ? 0 : Math.min(text.length*14, 2200) + 240;
+
+  thread.append(bubble({ who:"c", text }));
+
+  timers.push(setTimeout(()=>{
+    const dots = el("div","dots","<i></i><i></i><i></i>");
+    thread.append(dots);
+    timers.push(setTimeout(()=>{
+      dots.remove();
+      thread.append(bubble({ who:"a",
+        text: parsed.length > 1
+          ? "Here is what I picked up from that. In your store the next step queries your live catalog against these signals."
+          : "I can work with that, though a real customer usually gives more to go on. In your store this still queries your live catalog.",
+        parse: parsed }));
+      stamp("Understood the situation", (parsed.length||0) + " signals, no filters used");
+      timers.push(setTimeout(()=>{
+        const rec = near.turns.find(t=>t.products);
+        thread.append(bubble({ who:"a",
+          text:"This demo runs on a sample sporting goods catalog, so here is the closest match it holds. Pointed at your catalog, these would be your SKUs, your stock and your prices.",
+          products: rec.products }));
+        stamp("Recommended from the catalog", rec.products.length + " products, all in stock");
+      }, reduce?0:1500));
+    }, reduce?0:900));
+  }, t0));
+}
+function syncChipsOff(){ $$("[data-cat]").forEach(c=>c.setAttribute("aria-pressed","false")); }
+
+const askInput = $("#askInput"), askNote = $("#askNote");
+function ask(){
+  const v = askInput.value.trim();
+  if(v.length < 12){ askNote.textContent = "Give it a full sentence, the way a customer would actually write it."; return; }
+  askNote.textContent = "Reading your sentence. Switch back any time with a chip above.";
+  runCustom(v);
+}
+$("#askGo").onclick = ask;
+askInput.addEventListener("keydown", e=>{ if(e.key === "Enter") ask(); });
+
+/* ---------- hero: same customer, both ways ----------
+   Left panel and right panel both run off SITE.demos, so the question the
+   clerk answers on the right is the one going unanswered on the left. */
+const voidEl = $(".void"), voidText = $("#voidText"), voidAns = $("#voidAns"), voidFoot = $("#voidFoot");
+const afterThread = $("#afterThread"), afterFoot = $("#afterFoot"), frameUrl = $("#frameUrl");
+const VERDICTS = [
+  "No answer. They close the tab.",
+  "Nobody replies. They buy it somewhere else.",
+  "Four hundred results, no help. Gone.",
+  "The search box has no idea what they meant.",
+  "One question stood between them and an order.",
+  "Straight to a competitor who picks up the phone."
+];
+let heroAuto = true, heroTimers = [];
+
+/* the solution, rendered as the widget a customer would actually see */
+function paintAfter(){
+  if(!afterThread) return;
+  const d = SITE.demos[active];
+  const parseTurn = d.turns.find(t=>t.parse);
+  const prodTurn  = d.turns.find(t=>t.products);
+  const cartTurn  = d.turns.find(t=>t.cart);
+
+  if(frameUrl) frameUrl.textContent = d.store.toLowerCase().replace(/[^a-z0-9]+/g,"") + ".com";
+  afterThread.innerHTML = "";
+  afterThread.append(bubble({ who:"c", text:d.turns[0].text }));
+  afterThread.append(bubble({ who:"a", text:parseTurn.text, parse:parseTurn.parse }));
+  afterThread.append(bubble({ who:"a", text:prodTurn.text, products:prodTurn.products }));
+  afterFoot.innerHTML = `<span>Cart built · handed to your checkout</span><b>${cartTurn.cart.total}</b>`;
+}
+
+function paintHero(){
+  heroTimers.forEach(clearTimeout); heroTimers = [];
+  if(!voidEl) return;
+  const d = SITE.demos[active];
+  const line = d.turns[0].text;
+  const signals = (d.turns.find(t=>t.parse)?.parse || []).length;
+  const verdict = VERDICTS[active % VERDICTS.length];
+
+  paintAfter();
+  voidEl.classList.remove("gone");
+  voidAns.innerHTML = "";
+  voidFoot.innerHTML = `That sentence had <b>${signals} things</b> in it. Your search box used none of them.`;
+
+  const show = ()=>{
+    voidAns.innerHTML = '<div class="dots"><i></i><i></i><i></i></div>';
+    heroTimers.push(setTimeout(()=>{
+      voidEl.classList.add("gone");
+      voidAns.innerHTML = `<span class="verdict"><span class="x">&times;</span><b>${verdict}</b></span>`;
+      if(heroAuto && !reduce) heroTimers.push(setTimeout(()=>{
+        active = (active + 1) % SITE.demos.length;
+        paintChips(); run(); paintHero();
+      }, 3400));
+    }, 1900));
+  };
+
+  if(reduce){ voidText.textContent = '"'+line+'"'; show(); return; }
+  voidText.innerHTML = '<span class="q">"</span><span class="t"></span>';
+  const t = voidText.querySelector(".t");
+  let i = 0;
+  const tick = ()=>{
+    t.textContent = line.slice(0,++i);
+    if(i < line.length) heroTimers.push(setTimeout(tick, 20));
+    else { t.insertAdjacentHTML("afterend",'<span class="q">"</span>'); heroTimers.push(setTimeout(show, 600)); }
+  };
+  tick();
+}
+paintHero();
+
+/* stop cycling once the visitor scrolls past, so the full conversation
+   below does not restart while they are reading it */
+const heroIO = new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(!e.isIntersecting){ heroAuto = false; heroTimers.forEach(clearTimeout); } });
+},{threshold:.15});
+if(voidEl) heroIO.observe(voidEl);
+
+/* ---------- founding seats ---------- */
+const left = SITE.founding.seats - SITE.founding.taken;
+mount("seatCount").textContent = left;
+mount("seatDots").innerHTML = Array.from({length:SITE.founding.seats},(_,i)=>
+  `<i class="${i < SITE.founding.taken ? "taken":""}"></i>`).join("");
+
+/* ---------- platform selector (rendered into both views) ---------- */
+let plat = 0;
+
+const STATUS = { live:{l:"Live today",k:"y"}, build:{l:"In build",k:"m"}, generic:{l:"Generic adapter",k:"n"} };
+
+function platTabs(target){
+  const box = mount(target); if(!box) return;
+  box.innerHTML = SITE.platforms.map((p,i)=>
+    `<button class="plat" type="button" data-plat="${i}" data-status="${p.status}" aria-pressed="${i===plat}"><span class="dot"></span>${p.name}</button>`
+  ).join("");
+}
+function platBox(target){
+  const box = mount(target); if(!box) return;
+  const p = SITE.platforms[plat];
+  const st = STATUS[p.status];
+  box.innerHTML = `
+    <div class="platbox">
+      <div class="platbox__h">
+        <div class="card__h"><h3>${p.name}</h3><span class="pill pill--${st.k}">${st.l}</span></div>
+        <p>${p.blurb}</p>
+      </div>
+      ${p.rows.map(r=>`<div class="prow"><b>${r[0]}</b><span>${r[1]}</span></div>`).join("")}
+    </div>`;
+}
+const AC = SITE.adapterContract;
+const cm = mount("contract");
+if(cm) cm.innerHTML = [
+  { t:"What each adapter owns", pill:"per platform", k:"m", items:AC.owns },
+  { t:"What is written once", pill:"shared", k:"y", items:AC.shared }
+].map(c=>`
+  <div class="card">
+    <div class="card__h"><h3>${c.t}</h3><span class="pill pill--${c.k}">${c.pill}</span></div>
+    <ul class="list">${c.items.map(i=>`<li>${i}</li>`).join("")}</ul>
+  </div>`).join("");
+
+const mm = mount("methods");
+if(mm) mm.innerHTML = `
+  <div class="card">
+    <div class="card__h"><h3>The adapter interface</h3></div>
+    <p style="margin-bottom:14px">Implement these and the platform is supported. Nothing else in the system needs to know which store it is talking to.</p>
+    <div class="tool__g">${AC.methods.map(m=>`<code>${m}</code>`).join("")}</div>
+  </div>`;
+
+function paintPlatforms(){
+  ["plats","plats2"].forEach(platTabs);
+  ["platbox","platbox2"].forEach(platBox);
+  const badge = $("#panelPlat"); if(badge) badge.textContent = SITE.platforms[plat].badge || "";
+  $$("[data-plat]").forEach(b=>{
+    b.onclick = ()=>{ plat = +b.dataset.plat; paintPlatforms(); };
+  });
+}
+paintPlatforms();
+
+/* ---------- loss / keyword reduction ---------- */
+const L = SITE.loss;
+const attrHTML = L.attrs.map(a=>`<span class="attr">${a}</span>`).join("");
+mount("loss").innerHTML = `
+  <div class="lossbox lossbox--bad" id="lossbad">
+    <div class="lossbox__k">${L.badLabel}</div>
+    <div class="sent">"${L.sentence}"</div>
+    <div class="attrs">${attrHTML}</div>
+    <div class="kw">${L.keyword}</div>
+    <p style="font-size:14.5px;color:var(--muted);margin:16px 0 0">${L.badNote}</p>
+  </div>
+  <div class="lossbox lossbox--good">
+    <div class="lossbox__k">${L.goodLabel}</div>
+    <div class="sent">"${L.sentence}"</div>
+    <div class="attrs">${attrHTML}</div>
+    <div class="kw">All eight signals reach the catalog.</div>
+    <p style="font-size:14.5px;color:var(--muted);margin:16px 0 0">${L.goodNote}</p>
+  </div>`;
+
+/* ---------- simple card grids ---------- */
+mount("pains").innerHTML = SITE.pains.map(c=>`
+  <div class="card"><div class="card__h"><h3>${c.t}</h3></div><p>${c.p}</p></div>`).join("");
+
+mount("fit").innerHTML = SITE.fit.map(c=>`
+  <div class="card ${c.ok?"":"card--locked"}">
+    <div class="card__h"><h3>${c.t}</h3><span class="pill pill--${c.ok?"y":"n"}">${c.pill}</span></div>
+    <ul class="list">${c.items.map(i=>`<li>${i}</li>`).join("")}</ul>
+  </div>`).join("");
+
+mount("gets").innerHTML = SITE.gets.map(c=>`
+  <div class="card"><div class="card__h"><h3>${c.t}</h3></div><p>${c.p}</p></div>`).join("");
+
+const listCard = c => `
+  <div class="card ${c.ok===false?"card--locked":""}">
+    <div class="card__h"><h3>${c.t}</h3>${c.pill?`<span class="pill pill--${c.ok?"y":"n"}">${c.pill}</span>`:""}</div>
+    ${c.p?`<p style="margin-bottom:16px">${c.p}</p>`:""}
+    <ul class="list">${c.items.map(i=>`<li>${i}</li>`).join("")}</ul>
+  </div>`;
+
+["guards","surfaces","ownership","safety","notbuilding"].forEach(k=>{
+  const m = mount(k); if(m) m.innerHTML = SITE[k].map(c=>listCard({...c, pill:c.pill||c.tag})).join("");
+});
+
+mount("moat").innerHTML = SITE.moat.map(c=>`
+  <div class="card"><div class="card__h"><h3>${c.t}</h3></div><p>${c.p}</p></div>`).join("");
+
+/* ---------- attribution ---------- */
+mount("chain").innerHTML = SITE.chain.map((n,i)=>`
+  <button type="button" class="node ${n.end?"node--end":""}" data-step="${i}">
+    <div class="node__i">${n.i}</div><h3>${n.t}</h3><p>${n.p}</p><code>${n.c}</code>
+    <div class="node__bar"><i></i></div>
+  </button>`).join("");
+
+let step = 0, stepTimer = null, stepAuto = true;
+const nodes = $$(".node[data-step]");
+function paintStep(){
+  nodes.forEach((n,i)=>n.setAttribute("aria-current", i===step ? "step" : "false"));
+  if(stepTimer) clearTimeout(stepTimer);
+  if(stepAuto && !reduce) stepTimer = setTimeout(()=>{ step = (step+1) % nodes.length; paintStep(); }, 4000);
+}
+nodes.forEach(n=>n.onclick = ()=>{ stepAuto = false; step = +n.dataset.step; paintStep(); });
+paintStep();
+
+mount("rules").innerHTML = SITE.rules.map(r=>`
+  <div class="card">
+    <div class="card__h"><h3>${r.t}</h3><span class="pill pill--${r.kind}">${r.verdict}</span></div>
+    <div class="rule__f">${r.flow.map(f=>`<div>${f}</div>`).join("")}</div>
+    <p>${r.p}</p>
+  </div>`).join("");
+
+/* ---------- architecture ---------- */
+const layerHTML = l => `
+  <div class="layer ${l.ours?"layer--ours":""}">
+    <div><div class="layer__n">${l.n}</div><div class="layer__d">${l.d}</div></div>
+    ${l.ours?'<span class="layer__tag">ours</span>':""}
+  </div>`;
+mount("arch").innerHTML = SITE.arch.map((l,i)=>{
+  const body = l.split
+    ? `<div class="layer--split">${l.split.map(layerHTML).join("")}</div>`
+    : layerHTML(l);
+  return body + (i < SITE.arch.length-1 ? '<div class="arrow">↓</div>' : "");
+}).join("");
+
+/* ---------- tools ---------- */
+mount("tools").innerHTML = SITE.tools.map(t=>`
+  <div class="card">
+    <div class="card__h"><h3>${t.t}</h3></div>
+    <div class="tool__g">${t.items.map(i=>`<code>${i}</code>`).join("")}</div>
+    ${t.soon?`<div class="card__n" style="margin:18px 0 0">Later</div><div class="tool__g">${t.soon.map(i=>`<code class="soon">${i}</code>`).join("")}</div>`:""}
+  </div>`).join("");
+
+/* ---------- stack + flywheel ---------- */
+mount("stack").innerHTML = SITE.stack.map(s=>`
+  <div class="card"><div class="card__h"><h3>${s.t}</h3></div>
+  <ul class="stacklist">${s.items.map(i=>`<li>${i}</li>`).join("")}</ul></div>`).join("");
+
+mount("flywheel").innerHTML = SITE.flywheel.map(f=>`<span>${f}</span>`).join('<i>→</i>') + '<i>↻</i>';
+
+/* ---------- dashboard ---------- */
+mount("board").innerHTML = SITE.board.map((t,i)=>`
+  <div class="tile ${t.hero?"tile--hero":""}">
+    <div class="tile__k">${t.k}</div>
+    <div class="tile__v" data-count="${i}">${t.pre||""}0${t.suf||""}</div>
+    ${t.d?`<div class="tile__d">${t.d}</div>`:""}
+  </div>`).join("");
+
+const topIntent = Math.max(...SITE.intents.map(i=>i.n));
+mount("bars").innerHTML = SITE.intents.map(b=>`
+  <div class="bar">
+    <div><div class="bar__l">"${b.l}"</div>
+      <div class="bar__t"><span class="bar__f" data-w="${Math.round(b.n/topIntent*100)}"></span></div></div>
+    <div class="bar__n">${b.n.toLocaleString()}<br><b>${b.cv}</b></div>
+  </div>`).join("");
+
+/* ---------- weeks (both views) ---------- */
+const weekHTML = SITE.weeks.map(w=>`
+  <div class="week"><div class="week__n">${w.n}</div><h3>${w.t}</h3>
+  <ul>${w.items.map(i=>`<li>${i}</li>`).join("")}</ul>
+  <div class="week__g"><em>Ends with</em>${w.g}</div></div>`).join("");
+mount("weeks").innerHTML = weekHTML;
+mount("weeks2").innerHTML = weekHTML;
+
+mount("miles").innerHTML = SITE.miles.map(m=>`<div class="mile"><b>${m.b}</b><span>${m.s}</span></div>`).join("");
+
+/* ---------- faq ---------- */
+const faqHTML = list => list.map(f=>`
+  <details class="q"><summary class="q__b">${f.q}</summary><div class="q__a"><p>${f.a}</p></div></details>`).join("");
+mount("faqHome").innerHTML = faqHTML(SITE.faqHome);
+mount("faqTech").innerHTML = faqHTML(SITE.faqTech);
+
+/* ---------- calculator ---------- */
+mount("calc").outerHTML = `
+<div class="sim">
+  <div>
+    ${SITE.knobs.map(k=>`
+      <div class="knob">
+        <div class="knob__h"><span class="knob__l">${k.label}</span><span class="knob__v" id="v_${k.id}"></span></div>
+        <input type="range" id="k_${k.id}" min="${k.min}" max="${k.max}" step="${k.step}" value="${k.val}" aria-label="${k.label}">
+      </div>`).join("")}
+    <div class="terms">
+      <div class="knob__l">Founding terms</div>
+      <div class="price">1%<small> of attributed revenue</small></div>
+      <ul>
+        <li><b>$0</b><span>setup and implementation</span></li>
+        <li><b>$0</b><span>monthly platform fee</span></li>
+        <li><b>$0</b><span>if the AI generates nothing</span></li>
+      </ul>
+    </div>
+  </div>
+  <div>
+    <div class="funnel" id="funnel"></div>
+    <div class="split">
+      <div class="split__r split__r--keep"><span class="split__k">Monthly AI attributed GMV</span><span class="split__v" id="gmvOut"></span></div>
+      <div class="split__r"><span class="split__k">You pay us</span><span class="split__v" id="payOut"></span></div>
+      <div class="split__r"><span class="split__k">A typical fixed price app still bills</span><span class="split__v" id="saasOut"></span></div>
+    </div>
+    <p class="mono" id="calcNote" style="font-size:12.5px;color:var(--muted);margin-top:18px"></p>
+  </div>
+</div>`;
+
+function knobValues(){
+  const k = {};
+  SITE.knobs.forEach(x=>{ k[x.id] = +$("#k_"+x.id).value; });
+  return k;
+}
+function calc(){
+  const k = knobValues();
+  SITE.knobs.forEach(x=>{ $("#v_"+x.id).textContent = x.fmt(k[x.id]); });
+
+  const stages = SITE.funnel.map(f=>({ k:f.k, n:Math.round(f.from(k)), c:f.c }));
+  const top = stages[0].n || 1;
+  $("#funnel").innerHTML = stages.map(st=>{
+    const pct = Math.max(16, Math.round(st.n/top*100));
+    return `<div class="step" style="width:${pct}%;background:${st.c}">
+      <span>${st.k}</span><b>${st.n.toLocaleString()}<small> /mo</small></b></div>`;
+  }).join("");
+
+  const orders = stages[stages.length-1].n;
+  const gmv = orders * k.aov, pay = gmv * SITE.takeRate;
+  $("#gmvOut").textContent = money(gmv);
+  $("#payOut").textContent = money(pay, pay < 100 ? 2 : 0);
+  $("#saasOut").textContent = money(SITE.saasComparison);
+  $("#calcNote").textContent = gmv === 0
+    ? "At zero attributed revenue your invoice is zero. A fixed price app still bills " + money(SITE.saasComparison) + " this month."
+    : money(pay*12) + " a year to us, against " + money(gmv*12) + " a year of revenue that did not exist before.";
+}
+SITE.knobs.forEach(x=>$("#k_"+x.id).addEventListener("input", calc));
+calc();
+
+/* ---------- CTA (rendered into both views) ---------- */
+const ctaHTML = (id) => `
+<div class="cta">
+  <div>
+    <h2>Try it on your own catalog for 30 days.</h2>
+    <p>We install it, point it at your real products, and let it sell. No setup fee, no monthly fee. You pay 1% of the orders we can show you it created, and if it creates none you owe nothing and you have lost an hour.</p>
+    <p class="mono" style="font-size:12.5px;margin-top:18px">${left} of ${SITE.founding.seats} founding seats open</p>
+  </div>
+  <div class="form">
+    <input id="fStore${id}" type="text" placeholder="Store name">
+    <input id="fUrl${id}" type="text" placeholder="Store URL">
+    <input id="fEmail${id}" type="email" placeholder="Email">
+    <select id="fGmv${id}">
+      <option value="">Annual ecommerce revenue</option>
+      <option>Under $1M</option><option>$1M to $5M</option><option>$5M to $20M</option><option>$20M+</option>
+    </select>
+    <button class="btn btn--lit" data-send="${id}" type="button">Start my 30 days</button>
+    <small id="note${id}">Opens a pre filled email. No account, no card, no call required.</small>
+  </div>
+</div>`;
+mount("ctaHome").outerHTML = `<div class="wrap">${ctaHTML("A")}</div>`;
+mount("ctaTech").outerHTML = `<div class="wrap">${ctaHTML("B")}</div>`;
+
+$$("[data-send]").forEach(btn=>{
+  btn.onclick = ()=>{
+    const id = btn.dataset.send;
+    const store=$("#fStore"+id).value.trim(), url=$("#fUrl"+id).value.trim();
+    const email=$("#fEmail"+id).value.trim(), gmv=$("#fGmv"+id).value;
+    const note=$("#note"+id);
+    if(!store || !email){ note.textContent = "Add a store name and an email so we can reply."; return; }
+    const body = ["Store: "+store,"URL: "+url,"Email: "+email,"Annual revenue: "+(gmv||"not given"),"","I'd like a founding merchant seat."].join("\n");
+    location.href = "mailto:"+SITE.contact+"?subject="+encodeURIComponent("Founding seat — "+store)+"&body="+encodeURIComponent(body);
+    note.textContent = "Opening your email client with the details filled in.";
+  };
+});
+
+/* ---------- scroll reveals ---------- */
+const io = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(!e.isIntersecting || e.target.dataset.done) return;
+    e.target.dataset.done = 1;
+    if(e.target.dataset.count != null) countUp(e.target, SITE.board[+e.target.dataset.count]);
+    else if(e.target.dataset.w != null) e.target.style.width = e.target.dataset.w+"%";
+    else if(e.target.id === "lossbad") setTimeout(()=>e.target.classList.add("fell"), 500);
+    else e.target.classList.add("in");
+  });
+},{threshold:.35});
+
+function countUp(node,cfg){
+  if(reduce){ node.textContent=(cfg.pre||"")+cfg.v.toLocaleString("en-US",{minimumFractionDigits:cfg.dec||0,maximumFractionDigits:cfg.dec||0})+(cfg.suf||""); return; }
+  const dur=1250,t0=performance.now();
+  const step=now=>{
+    const p=Math.min(1,(now-t0)/dur), e=1-Math.pow(1-p,3);
+    node.textContent=(cfg.pre||"")+(cfg.v*e).toLocaleString("en-US",{minimumFractionDigits:cfg.dec||0,maximumFractionDigits:cfg.dec||0})+(cfg.suf||"");
+    if(p<1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+function observeAll(){
+  $$("[data-count],[data-w],.node,#lossbad").forEach((n,i)=>{
+    if(n.classList.contains("node")) n.style.transitionDelay = (i%4)*90+"ms";
+    io.observe(n);
+  });
+}
+observeAll();
+route();
+</script>
+</body>
+</html>

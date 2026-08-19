@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clerk: platform and architecture</title>
+<meta name="description" content="The commerce layer between AI intent and ecommerce transactions: the adapter contract, the commerce tool layer, how attribution is defined and audited, and what the model is never allowed to do.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<!-- the display face carries the claims, so it is loaded before first
+     paint: swapping it in later costs 0.18 of layout shift on a phone,
+     which is worse jank than the paint is worth -->
+<!-- the latin cut of the display face, preloaded: it sets the h1, so it
+     is both the LCP element and the thing that reflows the hero when it
+     lands late. A rotated URL costs one wasted fetch, never a broken
+     page, because the stylesheet below still resolves the real one -->
+<link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/bricolagegrotesque/v9/3y9K6as8bTXq_nANBjzKo3IeZx8z6up5BeSl9D4dj_x9PpZBMlGIInHWVyNJ.woff2" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/tokens.css">
+<link rel="stylesheet" href="styles/base.css">
+<link rel="stylesheet" href="styles/components.css">
+</head>
+<body data-page="platform">
+
+<a class="skip" href="#main">Skip to content</a>
+<nav class="nav" data-mount="nav"></nav>
+
+<main id="main">
+
+<header class="hero" style="padding:clamp(56px,7vw,100px) 0 clamp(44px,5vw,72px)"><div class="wrap">
+  <a class="crumb" href="index.html">← Back to the merchant page</a>
+  <div class="eyebrow">Platform &amp; architecture</div>
+  <h1 style="font-size:clamp(33px,5vw,62px);max-width:20ch;margin-bottom:22px">The commerce layer between AI intent and ecommerce transactions.</h1>
+  <p class="lede" style="max-width:66ch">This page is for the person your merchant forwards this to. It covers the two product surfaces, the tool layer, how attribution is defined and audited, what the model is and is not allowed to do, and the shape of the first build.</p>
+  <div class="hero__cta" style="margin-top:26px">
+    <a class="btn btn--lit" href="#tools">Commerce tool layer</a>
+    <a class="btn btn--ghost" href="#attrib">Attribution rules</a>
+    <a class="btn btn--ghost" href="#adapters">Adapters</a>
+    <a class="btn btn--ghost" href="#security">Security model</a>
+  </div>
+</div></header>
+
+<section><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Two surfaces, one integration</div>
+    <h2>The merchant integrates once. We manage where it sells.</h2>
+    <p class="lede">Product A is what ships now, because it is the surface we control and the fastest way to prove revenue. Product B is the same commerce engine pointed outward once the transaction loop is trusted.</p>
+  </div>
+  <div class="two" data-mount="surfaces"></div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Architecture</div>
+    <h2>The model sits beside the commerce engine, never on top of it.</h2>
+    <p class="lede">Language understanding and tool selection come from a replaceable provider. Everything that touches money, stock or state is deterministic and ours.</p>
+  </div>
+  <div class="arch" data-mount="arch"></div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Positioning, stated plainly</div>
+    <h2>This is not an OpenAI wrapper.</h2>
+    <p class="lede">Model providers are infrastructure and they are interchangeable. The architecture has to let us change one without rewriting the commerce platform. What follows is the actual split.</p>
+  </div>
+  <div class="two" data-mount="ownership"></div>
+</div></section>
+
+<section id="adapters" class="wash"><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Adapters</div>
+    <h2>Platform agnostic, stated as a contract.</h2>
+    <p class="lede">Agnostic is easy to claim and hard to prove, so here is the proof: every adapter implements the same interface, owns three concerns, and touches nothing else. Everything above the adapter is written once. That is why the second adapter cost a fraction of the first, and why an unusual stack is a conversation rather than a rebuild.</p>
+  </div>
+  <div class="contract" data-mount="contract" style="margin-bottom:26px"></div>
+  <div data-mount="methods" style="margin-bottom:34px"></div>
+  <div class="plats" data-mount="plats" role="group" aria-label="Choose a platform adapter"></div>
+  <div data-mount="platbox"></div>
+</div></section>
+
+<section id="tools" class="wash"><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Commerce tool layer</div>
+    <h2>The agent gets verbs, not access.</h2>
+    <p class="lede">It never issues a query against the store. It calls a fixed set of narrowly defined tools, each one validated, scoped to a merchant, and logged with the session that invoked it.</p>
+  </div>
+  <div class="tools" data-mount="tools"></div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Recommendation safety</div>
+    <h2>Retrieve, then reason. Never guess.</h2>
+    <p class="lede">Price, availability, variants and compatibility are transactional facts. They come from deterministic commerce APIs, not from the model's memory, which is what keeps the agent from inventing a product you do not sell.</p>
+  </div>
+  <div class="two" data-mount="safety"></div>
+</div></section>
+
+<section id="attrib"><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Attribution</div>
+    <h2>Every order carries a receipt for how it happened.</h2>
+    <p class="lede">Attribution is not a report generated at month end. It is an ID written at the moment of intent that travels all the way into the order record.</p>
+  </div>
+  <div class="chain" data-mount="chain"></div>
+  <div style="margin-top:clamp(40px,5vw,68px)">
+    <h3 style="margin-bottom:10px;font-size:24px">What counts as AI attributed revenue</h3>
+    <p class="lede" style="margin-bottom:28px">This definition determines the invoice, so it is written down, applied consistently, and auditable line by line in the dashboard.</p>
+    <div class="rules" data-mount="rules"></div>
+  </div>
+</div></section>
+
+<section id="security"><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Security model</div>
+    <h2>The destructive operations are not exposed at all.</h2>
+    <p class="lede">Not guarded by a prompt. Not discouraged by an instruction. Absent from the tool schema, so the model has no path to them regardless of what a customer types into the chat.</p>
+  </div>
+  <div class="two" data-mount="guards"></div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">MVP technical shape</div>
+    <h2>Deliberately small. One question to answer.</h2>
+    <p class="lede">Can an AI product expert measurably drive ecommerce transactions? Everything not required to answer that is out of scope for V1.</p>
+  </div>
+  <div class="stackcols" data-mount="stack"></div>
+  <div class="two" style="margin-top:14px" data-mount="notbuilding"></div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">30 day build</div>
+    <h2>First attributable transaction, week four.</h2>
+    <p class="lede">What gets built, in the order it gets built. The merchant facing version of this sequence, written as what a store owner has to do, is on the <a href="index.html#start" style="color:var(--intent)">merchant page</a>.</p>
+  </div>
+  <div class="weeks" data-mount="weeks"></div>
+  <p class="lede" style="margin:34px 0 0;font-size:15px">Targets for the build, not results. Nothing below has happened yet.</p>
+  <div class="miles" data-mount="miles"></div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Why it compounds</div>
+    <h2>The moat is the loop, not the widget.</h2>
+    <p class="lede">A chat widget is a weekend. A trusted commerce network with attributed outcomes attached to every recommendation is years, and it gets harder to catch with every transaction.</p>
+  </div>
+  <div class="flyw" data-mount="flywheel" style="margin-bottom:34px"></div>
+  <div class="three" data-mount="moat"></div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Technical questions</div>
+    <h2>The rest of the answers.</h2>
+  </div>
+  <div class="faq" data-mount="faq"></div>
+</div></section>
+
+<section id="start" class="tight"><div class="wrap" data-mount="cta"></div></section>
+
+</main>
+
+<footer data-mount="footer"></footer>
+
+<script type="module" src="src/pages/platform.js"></script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+name: Deploy
+
+# Vercel's own git integration is switched off in vercel.json, so nothing
+# ships without passing CI first. A pull request gets a preview URL, main
+# goes to production, and both wait for the checks.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    name: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+    needs: ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # a fork PR cannot read the secrets, so do not fail the run pretending to try
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Install the Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull the environment
+        run: vercel pull --yes --environment=${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }} --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build
+        run: vercel build ${{ github.ref == 'refs/heads/main' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy
+        id: deploy
+        run: |
+          url=$(vercel deploy --prebuilt ${{ github.ref == 'refs/heads/main' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "deployed to $url"
+
+      - name: Say where it went
+        run: echo "### Deployed to ${{ steps.deploy.outputs.url }}" >> "$GITHUB_STEP_SUMMARY"

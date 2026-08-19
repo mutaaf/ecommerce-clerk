@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clerk: an AI salesperson for your ecommerce store</title>
+<meta name="description" content="Clerk puts an AI product expert on your ecommerce store, whatever it runs on. It understands your catalog, helps customers choose, builds the cart, and proves which orders it created. $0 setup, $0 monthly, 1% of attributed revenue.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<!-- the display face carries the claims, so it is loaded before first
+     paint: swapping it in later costs 0.18 of layout shift on a phone,
+     which is worse jank than the paint is worth -->
+<!-- the latin cut of the display face, preloaded: it sets the h1, so it
+     is both the LCP element and the thing that reflows the hero when it
+     lands late. A rotated URL costs one wasted fetch, never a broken
+     page, because the stylesheet below still resolves the real one -->
+<link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/bricolagegrotesque/v9/3y9K6as8bTXq_nANBjzKo3IeZx8z6up5BeSl9D4dj_x9PpZBMlGIInHWVyNJ.woff2" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/tokens.css">
+<link rel="stylesheet" href="styles/base.css">
+<link rel="stylesheet" href="styles/components.css">
+</head>
+<body data-page="home">
+
+<a class="skip" href="#main">Skip to content</a>
+<nav class="nav" data-mount="nav"></nav>
+
+<main id="main">
+
+<header class="hero" id="top"><div class="wrap">
+  <div class="thesis">
+    <div class="eyebrow" data-bind="heroEyebrow"></div>
+    <h1>Ecommerce has one problem.<br><span class="hl">There is nobody in the shop.</span></h1>
+    <p class="thesis__sub">Walk into a good store and somebody comes over, asks two questions and hands you the right thing. Your website gives that same customer a search box, four hundred results and no one to ask. <b>Clerk</b> puts the salesperson back, on your site, working from your real stock. Here is the same customer, both ways.</p>
+  </div>
+
+  <p class="asklabel">Pick your category and watch the difference</p>
+  <div class="chips" data-mount="chips" role="group" aria-label="Choose your store category"></div>
+
+  <div class="ba">
+    <div class="ba__col">
+      <div class="ba__k"><span class="ba__tag ba__tag--bad">Your store today</span></div>
+      <div class="void" aria-live="polite">
+        <div class="void__head"><span class="void__dot"></span><span>A customer, on a store like yours</span></div>
+        <p class="void__q" id="voidText"></p>
+        <div class="void__a" id="voidAns"></div>
+        <div class="void__f" id="voidFoot"></div>
+      </div>
+    </div>
+
+    <div class="ba__col">
+      <div class="ba__k"><span class="ba__tag ba__tag--good">The same customer, with Clerk</span></div>
+      <div class="frame">
+        <div class="frame__bar">
+          <i></i><i></i><i></i>
+          <span class="frame__url" id="frameUrl"></span>
+        </div>
+        <div class="frame__body">
+          <div class="widget">
+            <div class="widget__head">
+              <span class="brand__mark" style="width:15px;height:15px;border-radius:5px"></span>
+              <span class="widget__t">Ask our product expert</span>
+              <span class="widget__x">&times;</span>
+            </div>
+            <div class="widget__thread" id="afterThread"></div>
+            <div class="widget__foot" id="afterFoot"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero__cta">
+    <a class="btn btn--lit btn--lg" href="#start">Try it on my catalog</a>
+    <a class="btn btn--ghost" href="#clerk">Have a full conversation with it</a>
+  </div>
+  <div class="hero__note" data-bind="heroNote"></div>
+</div></header>
+
+<section id="lose"><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Sound familiar</div>
+    <h2>You already know where you lose the sale.</h2>
+    <p class="lede">None of this is an AI problem. It is the plain fact that a website cannot ask a follow up question, and a good salesperson can.</p>
+  </div>
+  <div class="three" data-mount="pains"></div>
+</div></section>
+
+<section class="tight"><div class="wrap" style="padding-top:clamp(40px,5vw,72px)">
+  <div class="shead">
+    <div class="eyebrow">Why it happens</div>
+    <h2>Your search box deletes the reason someone is buying.</h2>
+    <p class="lede">A customer arrives knowing exactly what they need. Your site asks them to throw almost all of it away and type two words instead. In a real store, a good salesperson would just ask.</p>
+  </div>
+  <div class="loss" data-mount="loss"></div>
+</div></section>
+
+<section id="clerk" class="wash"><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Have a go</div>
+    <h2>The whole conversation, start to cart.</h2>
+    <p class="lede">The panel above is the short version. This is all of it: the follow up question, the honest answer that talks a customer out of the wrong product, and the cart at the end. Switch category, or type something one of your own customers has asked you.</p>
+  </div>
+
+  <p class="asklabel">What do you sell?</p>
+  <div class="chips" data-mount="chips" role="group" aria-label="Choose your store category"></div>
+
+  <div class="clerkgrid">
+    <div class="clerkside">
+      <div class="pain">
+        <div class="pain__k">What this store keeps losing</div>
+        <p class="pain__v" id="painOut"></p>
+      </div>
+      <div class="saidbox">
+        <div class="pain__k">The customer says</div>
+        <p class="said" data-mount="heroLine" aria-live="polite"></p>
+      </div>
+      <div class="ask">
+        <input id="askInput" type="text" maxlength="200" aria-label="Type what your customers ask you" placeholder="Or type what your customers ask you...">
+        <button id="askGo" type="button">Read it</button>
+      </div>
+      <p class="asknote" id="askNote">Type something one of your own customers has actually asked you.</p>
+    </div>
+    <div data-mount="panel"></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">What changes for you</div>
+    <h2>Six things, and none of them are technical.</h2>
+  </div>
+  <div class="three" data-mount="gets"></div>
+</div></section>
+
+<section class="wash"><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Is this for your store</div>
+    <h2>We would rather tell you no now.</h2>
+    <p class="lede">There is no setup fee, so the only thing a bad fit costs either of us is a month. Tick what is actually true about your store and we will tell you straight, including when the answer is no.</p>
+  </div>
+  <div class="fitcheck" data-mount="fit"></div>
+  <div data-mount="fitVerdict" aria-live="polite"></div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">What you actually see</div>
+    <h2>One screen. One question. How much did it make me?</h2>
+    <p class="lede">Not sessions, not conversations, not tokens. Orders and dollars, and you can click any of them and read the conversation that produced it.</p>
+  </div>
+</div>
+<div class="wrap">
+  <div class="board" data-mount="board"></div>
+  <div style="margin-top:clamp(48px,6vw,84px)">
+    <h3 style="margin-bottom:10px;font-size:24px">And the part your analytics cannot tell you</h3>
+    <p class="lede" style="margin-bottom:26px">Search logs show what people typed. Conversations show why they were shopping, and which reasons actually convert.</p>
+    <div class="bars" data-mount="bars"></div>
+  </div>
+</div></section>
+
+<section id="pricing" class="wash"><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Founding merchant pricing</div>
+    <h2>Model it on your own traffic.</h2>
+    <p class="lede">Four numbers you already know. The funnel fills in as you move them, and the only line we ever bill is a percentage of the revenue at the bottom of it.</p>
+  </div>
+  <div data-mount="calc"></div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Works with your stack</div>
+    <h2>Whatever your store runs on.</h2>
+    <p class="lede">You do not move platforms and you do not rebuild anything. WooCommerce and Shopify install today, Magento and BigCommerce are close, and anything custom still works. Pick yours to see what install actually involves.</p>
+  </div>
+  <div class="plats" data-mount="plats" role="group" aria-label="Choose your ecommerce platform"></div>
+  <div data-mount="platbox"></div>
+</div></section>
+
+<div><div class="wrap seats">
+  <div class="seats__in">
+    <div class="seats__n" data-mount="seatCount"></div>
+    <div class="seats__t" data-bind="seatCopy"></div>
+    <div class="dotsrow" data-mount="seatDots" aria-hidden="true"></div>
+  </div>
+</div></div>
+
+<section class="tight"><div class="wrap" style="padding-top:clamp(20px,3vw,40px)">
+  <div class="shead">
+    <div class="eyebrow">The 30 day pilot</div>
+    <h2>Installed in week one. Attributed revenue by week four.</h2>
+    <p class="lede">A sequence, not a roadmap. Every week ends on something you can go and check in your own store, and every week tells you what it costs you in time. It is nearly all our time, not yours.</p>
+  </div>
+  <div class="pilot" data-mount="pilot"></div>
+  <div data-mount="commitment"></div>
+
+  <div style="margin-top:clamp(48px,6vw,84px)">
+    <h3 style="margin-bottom:10px;font-size:24px">Day 30, both ways</h3>
+    <p class="lede" style="margin-bottom:26px">There are only two ways this ends, and we would rather write the second one down now than have it be a surprise.</p>
+    <div class="two" data-mount="outcomes"></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="shead">
+    <div class="eyebrow">Straight answers</div>
+    <h2>The six things every merchant asks.</h2>
+  </div>
+  <div class="faq" data-mount="faq"></div>
+  <p class="lede" style="margin-top:34px;font-size:16px">Got a developer or an agency who will want the detail? <a href="platform.html" style="color:var(--intent)">Send them the technical page</a>.</p>
+</div></section>
+
+<section id="start" class="tight"><div class="wrap" data-mount="cta"></div></section>
+
+</main>
+
+<footer data-mount="footer"></footer>
+
+<script type="module" src="src/pages/home.js"></script>
+</body>
+</html>

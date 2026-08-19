@@ -1,0 +1,23 @@
+# Vercel serves the deployment root as static files, and .gitignore is not
+# consulted, so everything that is not the site has to be named here.
+
+# dependencies and local artefacts
+node_modules
+shots
+
+# the commerce layer. Unbuilt TypeScript: the adapter contract, the
+# WooCommerce client and the whole attribution and invoice implementation.
+# Nothing in the deployed site imports it, and shipping it would publish
+# the business model in plaintext at /platform/src/attribution/reconcile.ts
+platform
+
+# dev only
+tools
+.baseline
+.env.example
+.gitignore
+.github
+
+# internal documents
+CLAUDE.md
+README.md

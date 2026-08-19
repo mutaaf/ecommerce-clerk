@@ -1,0 +1,70 @@
+/* ============================================================
+   TOKENS. Light, airy, generous. Deep ink is reserved for type
+   and one anchor block, never for whole sections.
+   Rule held throughout: claims are set in the display grotesque,
+   anything the system can PROVE (ids, money, metrics) is mono.
+   ============================================================ */
+:root{
+  --paper:#FBFBFD;
+  --card:#FFFFFF;
+  --wash-1:#F4F2FE;        /* pale violet, the intent side */
+  --wash-2:#EEF8F4;        /* pale mint, the proof side    */
+  --ink:#14161F;
+  --ink-soft:#3A3F4E;
+  --muted:#5F6577;
+  --faint:#687085;
+  --intent:#6B4EFF;
+  --intent-soft:#F6F3FF;
+  --proof:#00794F;
+  --proof-soft:#DCF5EA;
+  --flag:#F59331;
+  --flag-soft:#FFF0DE;
+  --line:rgba(20,22,31,.08);
+  --line-2:rgba(20,22,31,.14);
+  --sh-1:0 1px 2px rgba(20,22,31,.04);
+  --sh-2:0 2px 4px rgba(20,22,31,.03), 0 12px 28px -14px rgba(20,22,31,.16);
+  --sh-3:0 4px 8px rgba(20,22,31,.03), 0 24px 60px -22px rgba(20,22,31,.24);
+  --sh-mark:0 3px 10px -2px rgba(107,78,255,.5);     /* the brand mark glow */
+  --ring-1:0 0 0 4px var(--intent-soft);             /* the live dot, at rest */
+  --ring-2:0 0 0 8px rgba(107,78,255,.08);           /* and mid pulse         */
+  --display:'Bricolage Grotesque','Helvetica Neue',Arial,sans-serif;
+  --body:'Instrument Sans','Helvetica Neue',Arial,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+
+  /* Surfaces and chrome. Nothing outside this block names a colour. */
+  --paper-2:#FAF9FF;       /* second stop of the wash              */
+  --surface:#F4F5F8;       /* assistant bubbles, screenshot grid   */
+  --chrome:#E8EAF0;        /* the browser bezel in the hero        */
+  --chrome-dot:#C9CDD8;
+  --on-dark:#FFFFFF;       /* type sitting on ink or on an accent  */
+
+  /* The two gradient partners: violet is intent, mint is proof. */
+  --mint:#4ED6A8;
+  --mint-deep:#12B387;
+
+  /* The loss side of the argument. */
+  --warn-soft:#FFE9E4;
+  --warn-ink:#B83C0A;
+  --pain-soft:#FFF4EC;
+  --pain-ink:#9A4E0B;
+  --flag-ink:#96520A;
+  --proof-line:rgba(0,121,79,.32);
+
+  /* Foreground for type on an accent fill. Product swatches and
+     funnel stages pick these by name, so content never holds a hex. */
+  --on-intent:#FFFFFF;
+  --on-proof:#FFFFFF;
+  --on-flag:#14161F;
+
+  /* The funnel ramp, intent through to proof. */
+  --stage-1:#B9B2E8;  --on-stage-1:#14161F;
+  --stage-2:#8E7FEA;  --on-stage-2:#14161F;
+  --stage-3:#6B4EFF;  --on-stage-3:#FFFFFF;
+  --stage-4:#2FBE93;  --on-stage-4:#14161F;
+  --stage-5:#00794F;  --on-stage-5:#FFFFFF;
+
+  /* The single dark block at the end of each page. */
+  --night-1:#1A1633; --night-2:#1E2B3F; --night-3:#123A32;
+
+  --pad:clamp(20px,5vw,72px); --maxw:1220px; --r:20px;
+}
