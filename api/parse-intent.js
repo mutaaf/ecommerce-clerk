@@ -15,6 +15,29 @@ import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
 const MAX_CHARS = 400;
 const MAX_SIGNALS = 8;
 
+/* This endpoint is public, unauthenticated and costs money per call, so it
+   gets a cheap guard. Serverless instances do not share memory, so this
+   is best effort rather than a real rate limiter: it stops a browser tab
+   in a loop and a casual script, not a distributed one. The real backstop
+   is that a refused request is indistinguishable from a slow one to the
+   page, which falls back to the scripted parser either way. */
+const WINDOW_MS = 60_000;
+const PER_WINDOW = 12;
+const seen = new Map();
+
+function overLimit(ip) {
+  const now = Date.now();
+  const hits = (seen.get(ip) ?? []).filter(t => now - t < WINDOW_MS);
+  hits.push(now);
+  seen.set(ip, hits);
+  if (seen.size > 5000) seen.clear();          /* never grow without bound */
+  return hits.length > PER_WINDOW;
+}
+
+const clientIp = req =>
+  (req.headers['x-forwarded-for'] || '').split(',')[0].trim() ||
+  req.socket?.remoteAddress || 'unknown';
+
 const Signals = z.object({
   signals: z.array(z.object({
     label: z.string(),   /* what kind of thing it is: budget, age, fit, use */
@@ -63,6 +86,13 @@ export async function parseIntent(text) {
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return send(res, 405, { error: 'POST only' });
+
+  if (overLimit(clientIp(req))) {
+    /* Same shape as every other refusal: the page falls back quietly. */
+    res.setHeader('retry-after', '60');
+    return send(res, 429, { signals: [], reason: 'rate limited' });
+  }
+
 
   /* No key is a normal state, not a fault: a fresh clone runs the page on
      the scripted parser. Answer 200 with nothing in it so the browser
