@@ -1,5 +1,9 @@
 # Clerk
 
+[![CI](https://github.com/mutaaf/ecommerce-clerk/actions/workflows/deploy.yml/badge.svg)](https://github.com/mutaaf/ecommerce-clerk/actions/workflows/deploy.yml)
+
+Live at **https://ecommerce-clerk.vercel.app**
+
 Two things live here and they share nothing but `CLAUDE.md`.
 
 ```
@@ -99,7 +103,7 @@ noisier machine than a laptop.
 | GitHub repo secrets | `VERCEL_TOKEN` | lets the CLI deploy |
 | GitHub repo secrets | `VERCEL_ORG_ID` | from `.vercel/project.json` after `vercel link` |
 | GitHub repo secrets | `VERCEL_PROJECT_ID` | same file |
-| Vercel project env | `ANTHROPIC_API_KEY` | the hero input. Without it the page uses the scripted fallback and nothing breaks |
+| Vercel project env | `ANTHROPIC_API_KEY` | the hero input. **Not set yet**: the deployed site runs on the scripted fallback, which is a supported state, not a fault |
 
 ```
 vercel link                                    # writes .vercel/project.json

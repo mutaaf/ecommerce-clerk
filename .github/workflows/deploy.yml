@@ -26,8 +26,13 @@ jobs:
     needs: ci
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # a fork PR cannot read the secrets, so do not fail the run pretending to try
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    # A fork PR cannot read the secrets, and Dependabot PRs read from a
+    # separate secret store, so neither should pretend to deploy. Both
+    # still run the full CI job above.
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      (github.event_name == 'push' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
     environment:
       name: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
       url: ${{ steps.deploy.outputs.url }}
