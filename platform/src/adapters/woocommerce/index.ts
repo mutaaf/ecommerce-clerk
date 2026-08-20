@@ -54,13 +54,14 @@ export class WooCommerceAdapter implements CommerceAdapter {
 
   async syncCatalog(): Promise<CatalogSyncResult> {
     const startedAt = new Date();
-    let page = 1, products = 0, variations = 0;
+    const items: Product[] = [];
+    let page = 1, variations = 0;
 
     for (;;) {
       const batch = await this.#client.get<WooProduct[]>(`${V3}/products`, { per_page: PAGE, page });
       if (!batch.length) break;
-      products += batch.length;
       for (const raw of batch) {
+        items.push(toProduct(raw, this.#currency));
         if (raw.type === 'variable') {
           const vs = await this.#client.get<WooVariation[]>(`${V3}/products/${raw.id}/variations`, { per_page: PAGE });
           variations += vs.length;
@@ -69,7 +70,7 @@ export class WooCommerceAdapter implements CommerceAdapter {
       if (batch.length < PAGE) break;
       page += 1;
     }
-    return { merchantId: this.#merchantId, products, variations, startedAt, finishedAt: new Date() };
+    return { merchantId: this.#merchantId, items, products: items.length, variations, startedAt, finishedAt: new Date() };
   }
 
   async searchProducts(query: SearchQuery): Promise<readonly Product[]> {

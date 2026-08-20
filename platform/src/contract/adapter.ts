@@ -116,6 +116,12 @@ export interface SearchQuery {
 
 export interface CatalogSyncResult {
   readonly merchantId: MerchantId;
+  /* Normalizing the catalog is the adapter's job, so a sync hands back the
+     normalized products rather than a count of them. Retrieval keeps its
+     own copy; see catalog/store.ts for why that copy is never quoted at a
+     customer. A catalog too large to hold gets a streaming sync, which is
+     a V2 problem and not one V1 has. */
+  readonly items: readonly Product[];
   readonly products: number;
   readonly variations: number;
   readonly startedAt: Date;

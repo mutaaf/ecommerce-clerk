@@ -13,7 +13,8 @@
     "focus": "node tools/focus.mjs",
     "intent": "node tools/intent-test.mjs",
     "rules": "node tools/rules.mjs",
-    "check": "npm run rules && npm test"
+    "check": "npm run rules && npm test",
+    "demo": "node platform/demo.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
