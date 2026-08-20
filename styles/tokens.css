@@ -14,6 +14,11 @@
   --muted:#5F6577;
   --faint:#687085;
   --intent:#6B4EFF;
+  /* Type on the pale violet, which needs more than the accent has. At
+     4.61:1 the chips sat one hundredth above the line at rest and dipped
+     under it while fading in, so an audit passed or failed on when it
+     happened to sample. This has the headroom to be uninteresting. */
+  --intent-ink:#5334DE;
   --intent-soft:#F6F3FF;
   --proof:#00794F;
   --proof-soft:#DCF5EA;

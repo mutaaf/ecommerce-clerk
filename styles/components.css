@@ -86,8 +86,12 @@
 .void__head{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:18px}
 .void__dot{width:7px;height:7px;border-radius:50%;background:var(--intent);box-shadow:var(--ring-1);animation:pulse 2s ease-in-out infinite}
 @keyframes pulse{50%{box-shadow:var(--ring-2)}}
-.void__q{font-family:var(--display);font-weight:400;font-size:clamp(19px,2.4vw,30px);letter-spacing:-.026em;line-height:1.32;color:var(--ink);margin:0 0 20px;transition:opacity .7s ease,filter .7s ease}
-.void.gone .void__q{opacity:.24;filter:blur(1.5px)}
+.void__q{font-family:var(--display);font-weight:400;font-size:clamp(19px,2.4vw,30px);letter-spacing:-.026em;line-height:1.32;color:var(--ink);margin:0 0 20px;transition:color .7s ease,filter .7s ease}
+/* The question goes unanswered, so it recedes. It recedes to a colour
+   rather than to 24% opacity, which rendered at 1.69:1 and meant anyone
+   arriving mid fade was looking at text they could not read. The blur
+   still does the dissolving. */
+.void.gone .void__q{color:var(--faint);filter:blur(1px)}
 .void__a{min-height:38px;display:flex;align-items:center;gap:11px;font-size:15.5px;color:var(--faint)}
 .void__a .dots{padding:11px 14px}
 .void__a .verdict{display:flex;align-items:center;gap:10px;font-size:15.5px;color:var(--ink-soft);opacity:0;animation:rise .5s ease forwards}
@@ -158,8 +162,11 @@
 .dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
 @keyframes bob{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
 .parse{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.parse span{font-family:var(--mono);font-size:11px;padding:4px 9px;border-radius:7px;background:var(--intent-soft);color:var(--intent);animation:pop .3s cubic-bezier(.2,1.4,.4,1) backwards}
-@keyframes pop{from{opacity:0;transform:scale(.82)}}
+.parse span{font-family:var(--mono);font-size:11px;padding:4px 9px;border-radius:7px;background:var(--intent-soft);color:var(--intent-ink);animation:pop .3s cubic-bezier(.2,1.4,.4,1) backwards}
+/* scale only. Fading text in means rendering it at low contrast for a
+   few frames, which is a real if brief accessibility problem and an
+   audit sampling then is not wrong. */
+@keyframes pop{from{transform:scale(.82)}}
 .prods{display:flex;flex-direction:column;gap:8px;margin-top:12px}
 .prod{display:flex;align-items:center;gap:12px;padding:11px 12px;border:1px solid var(--line);border-radius:13px;background:var(--card);transition:.18s}
 .prod:hover{transform:translateX(2px);box-shadow:var(--sh-2)}
@@ -300,7 +307,7 @@
 .node__i{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.1em}
 .node h3{margin:11px 0 8px;font-size:19px}
 .node p{font-size:14.6px;color:var(--muted);margin:0 0 14px}
-.node code{display:block;font-family:var(--mono);font-size:11.5px;background:var(--wash-1);border-radius:9px;padding:10px 11px;word-break:break-all;color:var(--intent)}
+.node code{display:block;font-family:var(--mono);font-size:11.5px;background:var(--wash-1);border-radius:9px;padding:10px 11px;word-break:break-all;color:var(--intent-ink)}
 .node--end code{background:var(--proof-soft);color:var(--proof)}
 .node__bar{height:3px;border-radius:3px;background:var(--line);margin-top:16px;overflow:hidden}
 .node__bar i{display:block;height:100%;width:0;background:var(--intent);border-radius:3px}
@@ -365,7 +372,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 .pstep__d{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint)}
 .pstep h3{margin-bottom:20px;font-size:19px}
 .pstep__k{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:11px}
-.pstep__t{font-family:var(--mono);font-size:11px;letter-spacing:0;text-transform:none;color:var(--intent);background:var(--intent-soft);border-radius:7px;padding:3px 9px}
+.pstep__t{font-family:var(--mono);font-size:11px;letter-spacing:0;text-transform:none;color:var(--intent-ink);background:var(--intent-soft);border-radius:7px;padding:3px 9px}
 .pstep ul{list-style:none;margin:0 0 22px;padding:0;display:grid;gap:9px;font-size:14.2px;color:var(--muted);line-height:1.45}
 .pstep li{display:flex;gap:10px;align-items:flex-start}
 .pstep li::before{content:"";width:5px;height:5px;border-radius:50%;flex:none;margin-top:8px;background:var(--line-2)}
@@ -432,12 +439,12 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 @media(max-width:640px){.layer--split{grid-template-columns:1fr}}
 .layer__n{font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:-.02em}
 .layer__d{font-family:var(--mono);font-size:12px;color:var(--faint);margin-top:2px}
-.layer__tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--intent);background:var(--intent-soft);border-radius:6px;padding:3px 8px;margin-left:auto}
+.layer__tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--intent-ink);background:var(--intent-soft);border-radius:6px;padding:3px 8px;margin-left:auto}
 .arrow{text-align:center;color:var(--line-2);font-family:var(--mono);font-size:15px;line-height:1}
 .tools{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 @media(max-width:900px){.tools{grid-template-columns:1fr}}
 .tool__g{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
-.tool__g code{font-family:var(--mono);font-size:12px;padding:6px 10px;border-radius:8px;background:var(--wash-1);color:var(--intent)}
+.tool__g code{font-family:var(--mono);font-size:12px;padding:6px 10px;border-radius:8px;background:var(--wash-1);color:var(--intent-ink)}
 .tool__g code.soon{background:rgba(20,22,31,.04);color:var(--faint)}
 .rules{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 @media(max-width:900px){.rules{grid-template-columns:1fr}}

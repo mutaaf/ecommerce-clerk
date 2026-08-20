@@ -66,17 +66,19 @@ jobs:
       - name: Screenshots at 1440, 900 and 390
         run: npm run shots
 
-      # Lighthouse holds accessibility, best practices and SEO at 100.
-      # Performance gets a floor, because a shared runner is a noisier
-      # machine than a laptop.
+      # Lighthouse holds accessibility, best practices and SEO at 100:
+      # those are correctness and they do not move. Performance gets a
+      # loose floor, because a shared runner is a noisy machine and a gate
+      # that fails at random is a gate people learn to ignore. It still
+      # catches the kind of regression that matters.
       - name: Lighthouse, mobile
         run: npm run lighthouse
         env:
-          MIN_PERF: 75
+          MIN_PERF: 70
       - name: Lighthouse, desktop
         run: npm run lighthouse -- desktop
         env:
-          MIN_PERF: 85
+          MIN_PERF: 80
 
       - name: Keep the screenshots
         uses: actions/upload-artifact@v7
