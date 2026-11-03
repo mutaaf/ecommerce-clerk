@@ -21,7 +21,23 @@ const BUDGET = {
 };
 const missed = [];
 
-const chrome = await chromeLauncher.launch({ chromeFlags: ['--headless=new', '--no-sandbox'] });
+/* Chrome sometimes does not open its debugging port in time on a busy
+   machine, and the run dies before a single page is audited. That says
+   nothing about the site, so the launch alone gets a few tries. The
+   audits themselves are never retried. */
+async function launchChrome(tries = 3) {
+  for (let i = 1; ; i++) {
+    try {
+      return await chromeLauncher.launch({ chromeFlags: ['--headless=new', '--no-sandbox'] });
+    } catch (err) {
+      if (i >= tries) throw err;
+      console.error(`chrome did not start (${err.message}), retrying ${i}/${tries - 1}`);
+      await new Promise(r => setTimeout(r, 1000 * i));
+    }
+  }
+}
+
+const chrome = await launchChrome();
 fs.mkdirSync('shots/lighthouse', { recursive: true });
 
 for (const [name, url] of PAGES) {
