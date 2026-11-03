@@ -94,7 +94,7 @@
 .void.gone .void__q{color:var(--faint);filter:blur(1px)}
 .void__a{min-height:38px;display:flex;align-items:center;gap:11px;font-size:15.5px;color:var(--faint)}
 .void__a .dots{padding:11px 14px}
-.void__a .verdict{display:flex;align-items:center;gap:10px;font-size:15.5px;color:var(--ink-soft);opacity:0;animation:rise .5s ease forwards}
+.void__a .verdict{display:flex;align-items:center;gap:10px;font-size:15.5px;color:var(--ink-soft);transform:translateY(10px);animation:rise .5s ease forwards}
 .void__a .verdict b{font-weight:600}
 .void__a .x{width:22px;height:22px;border-radius:7px;background:var(--warn-soft);color:var(--warn-ink);display:grid;place-items:center;font-size:13px;flex:none}
 .void__f{margin-top:auto;padding-top:20px;border-top:1px dashed var(--line-2);font-size:14.5px;color:var(--muted);opacity:0;transition:opacity .5s ease}
@@ -149,9 +149,12 @@
 .replay{background:none;border:0;color:var(--faint);font-size:12.5px;padding:4px 6px;border-radius:6px}
 .replay:hover{color:var(--intent)}
 .thread{padding:20px 18px 24px;display:flex;flex-direction:column;gap:14px;min-height:400px}
-.msg{max-width:93%;opacity:0;transform:translateY(10px);animation:rise .45s cubic-bezier(.2,.8,.2,1) forwards}
+.msg{max-width:93%;transform:translateY(10px);animation:rise .45s cubic-bezier(.2,.8,.2,1) forwards}
 .msg--c{align-self:flex-end;max-width:86%}
-@keyframes rise{to{opacity:1;transform:none}}
+/* motion only, for the same reason as pop. Every rise is text arriving,
+   and fading it in rendered the 10px speaker label at 4.36:1 for a few
+   frames, so Lighthouse failed the page whenever it sampled mid fade. */
+@keyframes rise{to{transform:none}}
 .msg__b{padding:12px 15px;border-radius:16px;font-size:14.6px;line-height:1.5}
 .msg--c .msg__b{background:var(--intent);color:var(--on-dark);border-bottom-right-radius:5px}
 .msg--a .msg__b{background:var(--surface);color:var(--ink-soft);border-bottom-left-radius:5px}
@@ -183,7 +186,7 @@
 .ledger{border-left:1px solid var(--line);padding:20px 16px;background:linear-gradient(180deg,var(--paper),var(--wash-2))}
 @media(max-width:640px){.ledger{border-left:0;border-top:1px solid var(--line)}}
 .ledger__t{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--faint);margin-bottom:16px}
-.stamp{opacity:0;transform:translateX(8px);animation:rise .4s ease forwards;padding:9px 0;border-bottom:1px dashed var(--line-2)}
+.stamp{transform:translateX(8px);animation:rise .4s ease forwards;padding:9px 0;border-bottom:1px dashed var(--line-2)}
 .stamp__k{font-family:var(--mono);font-size:10.5px;color:var(--faint)}
 .stamp__v{font-family:var(--mono);font-size:12px;color:var(--ink);word-break:break-all;margin-top:3px}
 .stamp--win .stamp__v{color:var(--proof);font-weight:600;font-size:16px}
